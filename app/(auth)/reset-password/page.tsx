@@ -29,7 +29,7 @@ export default async function ResetPasswordPage({
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">新しいパスワード</h1>
-      <p className="text-sm text-zinc-600">新しいパスワードを設定してください。</p>
+      <p className="text-sm text-zinc-800">新しいパスワードを設定してください。</p>
 
       {errorMessage && (
         <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -49,7 +49,7 @@ export default async function ResetPasswordPage({
             autoComplete="new-password"
             required
             minLength={6}
-            className="w-full rounded border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
+            className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
           />
         </div>
 
@@ -62,7 +62,7 @@ export default async function ResetPasswordPage({
       </form>
 
       <div className="text-center text-sm">
-        <Link href="/login" className="text-zinc-600 hover:text-zinc-900 hover:underline">
+        <Link href="/login" className="text-zinc-800 underline hover:text-zinc-900">
           ログインに戻る
         </Link>
       </div>

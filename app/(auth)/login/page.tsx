@@ -36,7 +36,7 @@ export default async function LoginPage({
             type="email"
             autoComplete="email"
             required
-            className="w-full rounded border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
+            className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
           />
         </div>
 
@@ -50,7 +50,7 @@ export default async function LoginPage({
             type="password"
             autoComplete="current-password"
             required
-            className="w-full rounded border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
+            className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
           />
         </div>
 
@@ -63,7 +63,7 @@ export default async function LoginPage({
       </form>
 
       <div className="text-center text-sm">
-        <Link href="/forgot-password" className="text-zinc-600 hover:text-zinc-900 hover:underline">
+        <Link href="/forgot-password" className="text-zinc-800 underline hover:text-zinc-900">
           パスワードを忘れた場合
         </Link>
       </div>

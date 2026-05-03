@@ -12,12 +12,12 @@ export default async function ForgotPasswordPage({
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold">メール送信済み</h1>
-        <p className="text-sm text-zinc-700">
+        <p className="text-sm text-zinc-800">
           パスワード再設定用のリンクをメールで送信しました。受信トレイをご確認ください。
         </p>
         <Link
           href="/login"
-          className="block text-center text-sm text-zinc-600 hover:text-zinc-900 hover:underline"
+          className="block text-center text-sm text-zinc-800 underline hover:text-zinc-900"
         >
           ログインに戻る
         </Link>
@@ -28,7 +28,7 @@ export default async function ForgotPasswordPage({
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">パスワード再設定</h1>
-      <p className="text-sm text-zinc-600">
+      <p className="text-sm text-zinc-800">
         登録メールアドレスを入力してください。再設定用のリンクを送信します。
       </p>
 
@@ -43,7 +43,7 @@ export default async function ForgotPasswordPage({
             type="email"
             autoComplete="email"
             required
-            className="w-full rounded border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
+            className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
           />
         </div>
 
@@ -56,7 +56,7 @@ export default async function ForgotPasswordPage({
       </form>
 
       <div className="text-center text-sm">
-        <Link href="/login" className="text-zinc-600 hover:text-zinc-900 hover:underline">
+        <Link href="/login" className="text-zinc-800 underline hover:text-zinc-900">
           ログインに戻る
         </Link>
       </div>
