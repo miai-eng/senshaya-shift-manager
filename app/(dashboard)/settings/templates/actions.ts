@@ -2,6 +2,7 @@
 
 import { requireManager } from '@/lib/auth/manager'
 import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 export async function updateTemplate(formData: FormData): Promise<void> {
@@ -19,14 +20,15 @@ export async function updateTemplate(formData: FormData): Promise<void> {
 
   const supabase = await createClient()
 
-  const { error } = await supabase
-    .from('message_templates')
-    .update({ body: body.trim(), updated_at: new Date().toISOString() })
-    .eq('type', type)
+  const { error } = await supabase.from('message_templates').upsert(
+    { type, body: body.trim(), updated_at: new Date().toISOString() },
+    { onConflict: 'type' }
+  )
 
   if (error) {
     redirect('/settings/templates?error=save_failed')
   }
 
+  revalidatePath('/settings/templates')
   redirect(`/settings/templates?saved=${type}`)
 }
