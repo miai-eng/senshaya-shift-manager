@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { requireManager } from '@/lib/auth/manager'
 import { createClient } from '@/lib/supabase/server'
 import { DaysOffForm } from '@/components/features/days-off-form'
 import { updateDaysOff } from '../../actions'
@@ -9,6 +10,8 @@ export default async function EditDaysOffPage({
 }: {
   params: Promise<{ id: string }>
 }) {
+  await requireManager()
+
   const { id } = await params
   const supabase = await createClient()
 

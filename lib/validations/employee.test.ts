@@ -11,8 +11,8 @@ describe('validatePhone', () => {
       expect(validatePhone('+14162345678')).toBeNull()
     })
 
-    it('1始まり市外局番でも受け入れる', () => {
-      expect(validatePhone('+11234567890')).toBeNull()
+    it('0・1始まり市外局番を拒否する', () => {
+      expect(validatePhone('+11234567890')).not.toBeNull()
     })
   })
 

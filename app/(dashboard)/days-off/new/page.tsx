@@ -1,9 +1,12 @@
 import Link from 'next/link'
+import { requireManager } from '@/lib/auth/manager'
 import { createClient } from '@/lib/supabase/server'
 import { DaysOffForm } from '@/components/features/days-off-form'
 import { createDaysOff } from '../actions'
 
 export default async function NewDaysOffPage() {
+  await requireManager()
+
   const supabase = await createClient()
   const { data: employees } = await supabase
     .from('employees')

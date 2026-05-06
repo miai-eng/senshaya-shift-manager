@@ -105,7 +105,9 @@ export async function deleteDaysOff(formData: FormData): Promise<void> {
 
   const id = formData.get('id') as string
   const supabase = await createClient()
-  await supabase.from('requested_days_off').delete().eq('id', id)
+  const { error } = await supabase.from('requested_days_off').delete().eq('id', id)
+
+  if (error) throw new Error('削除に失敗しました')
 
   revalidatePath('/days-off')
 }
