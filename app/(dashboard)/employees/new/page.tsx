@@ -1,8 +1,11 @@
 import Link from 'next/link'
+import { requireManager } from '@/lib/auth/manager'
 import { EmployeeForm } from '@/components/features/employee-form'
 import { createEmployee } from '../actions'
 
-export default function NewEmployeePage() {
+export default async function NewEmployeePage() {
+  await requireManager()
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">

@@ -98,10 +98,12 @@ export async function archiveEmployee(formData: FormData): Promise<void> {
 
   const id = formData.get('id') as string
   const supabase = await createClient()
-  await supabase
+  const { error } = await supabase
     .from('employees')
     .update({ is_active: false, updated_at: new Date().toISOString() })
     .eq('id', id)
+
+  if (error) throw new Error('アーカイブに失敗しました')
 
   revalidatePath('/employees')
 }
@@ -111,10 +113,12 @@ export async function restoreEmployee(formData: FormData): Promise<void> {
 
   const id = formData.get('id') as string
   const supabase = await createClient()
-  await supabase
+  const { error } = await supabase
     .from('employees')
     .update({ is_active: true, updated_at: new Date().toISOString() })
     .eq('id', id)
+
+  if (error) throw new Error('復元に失敗しました')
 
   revalidatePath('/employees')
 }

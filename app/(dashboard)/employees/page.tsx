@@ -41,7 +41,10 @@ export default async function EmployeesPage({
   if (currentStatus === 'active') query = query.eq('is_active', true)
   else if (currentStatus === 'archived') query = query.eq('is_active', false)
 
-  if (q.trim()) query = query.ilike('name', `%${q.trim()}%`)
+  if (q.trim()) {
+    const escaped = q.trim().replace(/[%_\\]/g, '\\$&')
+    query = query.ilike('name', `%${escaped}%`)
+  }
 
   const { data: employees } = await query
 
@@ -111,7 +114,9 @@ export default async function EmployeesPage({
               {(employees as Employee[]).map((emp) => (
                 <tr key={emp.id} className={emp.is_active ? '' : 'opacity-50'}>
                   <td className="py-3 pr-4 font-medium">{emp.name}</td>
-                  <td className="py-3 pr-4 font-mono text-xs">{emp.phone}</td>
+                  <td className="py-3 pr-4 font-mono text-xs">
+                    {'*'.repeat(emp.phone.length - 4) + emp.phone.slice(-4)}
+                  </td>
                   <td className="py-3 pr-4 text-zinc-600">{emp.visa_type ?? '—'}</td>
                   <td className="py-3 pr-4 text-zinc-600">
                     {emp.weekly_hour_limit != null ? `${emp.weekly_hour_limit}h` : '—'}
