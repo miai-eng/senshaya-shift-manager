@@ -11,24 +11,38 @@ export default async function EditEmployeePage({
 }) {
   const { id } = await params
   const supabase = await createClient()
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('id, name, phone, visa_type, weekly_hour_limit, notes')
-    .eq('id', id)
-    .single()
+
+  const [{ data: employee }, { data: recurringDaysOff }] = await Promise.all([
+    supabase
+      .from('employees')
+      .select('id, name, phone, visa_type, weekly_hour_limit, notes')
+      .eq('id', id)
+      .single(),
+    supabase
+      .from('recurring_days_off')
+      .select('day_of_week')
+      .eq('employee_id', id),
+  ])
 
   if (!employee) notFound()
 
+  const offDays = new Set((recurringDaysOff ?? []).map((r) => r.day_of_week))
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center gap-4">
         <Link href="/employees" className="text-sm text-zinc-500 hover:text-zinc-700">
           ← 従業員一覧
         </Link>
         <h1 className="text-2xl font-bold">従業員を編集</h1>
       </div>
+
       <div className="max-w-lg">
-        <EmployeeForm action={updateEmployee} defaultValues={employee} />
+        <EmployeeForm
+          action={updateEmployee}
+          defaultValues={employee}
+          defaultOffDays={[...offDays]}
+        />
       </div>
     </div>
   )

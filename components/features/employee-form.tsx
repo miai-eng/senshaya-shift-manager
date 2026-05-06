@@ -3,6 +3,8 @@
 import { useActionState } from 'react'
 import type { EmployeeState } from '@/app/(dashboard)/employees/actions'
 
+const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
+
 type Action = (prevState: EmployeeState, formData: FormData) => Promise<EmployeeState>
 
 interface EmployeeFormProps {
@@ -15,9 +17,11 @@ interface EmployeeFormProps {
     weekly_hour_limit?: number | null
     notes?: string | null
   }
+  defaultOffDays?: number[]
 }
 
-export function EmployeeForm({ action, defaultValues = {} }: EmployeeFormProps) {
+export function EmployeeForm({ action, defaultValues = {}, defaultOffDays = [] }: EmployeeFormProps) {
+  const offDaySet = new Set(defaultOffDays)
   const [state, formAction] = useActionState(action, {})
 
   return (
@@ -106,6 +110,24 @@ export function EmployeeForm({ action, defaultValues = {} }: EmployeeFormProps) 
           defaultValue={defaultValues.notes ?? ''}
           className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
         />
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-sm font-medium">定期休み（曜日固定）</p>
+        <div className="flex flex-wrap gap-3">
+          {DAY_LABELS.map((label, dow) => (
+            <label key={dow} className="flex items-center gap-1.5 text-sm">
+              <input
+                type="checkbox"
+                name="day_of_week"
+                value={dow}
+                defaultChecked={offDaySet.has(dow)}
+                className="rounded border-zinc-400"
+              />
+              {label}
+            </label>
+          ))}
+        </div>
       </div>
 
       <button

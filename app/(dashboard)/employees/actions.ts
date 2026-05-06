@@ -53,6 +53,10 @@ function parseFormData(formData: FormData): {
   return { data: { name: name!, phone: phone!, visa_type, weekly_hour_limit, notes } }
 }
 
+function parseOffDays(formData: FormData): number[] {
+  return formData.getAll('day_of_week').map((v) => parseInt(v as string, 10))
+}
+
 export async function createEmployee(
   _prevState: EmployeeState,
   formData: FormData
@@ -63,9 +67,20 @@ export async function createEmployee(
   if (errors) return { fieldErrors: errors }
 
   const supabase = await createClient()
-  const { error } = await supabase.from('employees').insert(data!)
+  const { data: inserted, error } = await supabase
+    .from('employees')
+    .insert(data!)
+    .select('id')
+    .single()
 
-  if (error) return { error: '保存に失敗しました。時間を置いて再度お試しください。' }
+  if (error || !inserted) return { error: '保存に失敗しました。時間を置いて再度お試しください。' }
+
+  const offDays = parseOffDays(formData)
+  if (offDays.length > 0) {
+    await supabase.from('recurring_days_off').insert(
+      offDays.map((day) => ({ employee_id: inserted.id, day_of_week: day }))
+    )
+  }
 
   redirect('/employees')
 }
@@ -89,6 +104,14 @@ export async function updateEmployee(
     .eq('id', id)
 
   if (error) return { error: '保存に失敗しました。時間を置いて再度お試しください。' }
+
+  const offDays = parseOffDays(formData)
+  await supabase.from('recurring_days_off').delete().eq('employee_id', id)
+  if (offDays.length > 0) {
+    await supabase.from('recurring_days_off').insert(
+      offDays.map((day) => ({ employee_id: id, day_of_week: day }))
+    )
+  }
 
   redirect('/employees')
 }
@@ -117,4 +140,25 @@ export async function restoreEmployee(formData: FormData): Promise<void> {
     .eq('id', id)
 
   revalidatePath('/employees')
+}
+
+// day_of_week: 0=日 〜 6=土
+export async function updateRecurringDaysOff(formData: FormData): Promise<void> {
+  await requireManager()
+
+  const employeeId = formData.get('employee_id') as string
+  const selected = formData.getAll('day_of_week').map((v) => parseInt(v as string, 10))
+
+  const supabase = await createClient()
+
+  // 既存レコードを全削除してから選択分を挿入（シンプルな置き換え）
+  await supabase.from('recurring_days_off').delete().eq('employee_id', employeeId)
+
+  if (selected.length > 0) {
+    await supabase.from('recurring_days_off').insert(
+      selected.map((day) => ({ employee_id: employeeId, day_of_week: day }))
+    )
+  }
+
+  revalidatePath(`/employees/${employeeId}/edit`)
 }
