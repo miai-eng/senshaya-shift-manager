@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { requireManager } from '@/lib/auth/manager'
 import { signOut } from '@/lib/auth/actions'
 
@@ -7,7 +8,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-3">
-        <div className="text-sm font-semibold">Senshaya Shift Manager</div>
+        <Link href="/dashboard" className="text-sm font-semibold hover:text-zinc-600">
+          Senshaya Shift Manager
+        </Link>
         <div className="flex items-center gap-4 text-sm">
           <span className="text-zinc-900">
             {manager.name}

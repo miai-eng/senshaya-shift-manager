@@ -20,6 +20,13 @@ export default async function DashboardPage() {
           <div className="mt-1 text-sm text-zinc-500">従業員の追加・編集・アーカイブ</div>
         </Link>
         <Link
+          href="/days-off"
+          className="rounded border border-zinc-200 p-4 hover:bg-zinc-50"
+        >
+          <div className="font-semibold">リクエストオフ管理</div>
+          <div className="mt-1 text-sm text-zinc-500">従業員のオフ期間を登録・管理する</div>
+        </Link>
+        <Link
           href="/settings/templates"
           className="rounded border border-zinc-200 p-4 hover:bg-zinc-50"
         >

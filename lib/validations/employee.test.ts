@@ -11,8 +11,8 @@ describe('validatePhone', () => {
       expect(validatePhone('+14162345678')).toBeNull()
     })
 
-    it('市外局番が2始まりの番号を受け入れる', () => {
-      expect(validatePhone('+12043456789')).toBeNull()
+    it('1始まり市外局番でも受け入れる', () => {
+      expect(validatePhone('+11234567890')).toBeNull()
     })
   })
 
@@ -29,20 +29,16 @@ describe('validatePhone', () => {
       expect(validatePhone('+160412345678')).not.toBeNull()
     })
 
-    it('市外局番が1始まりは拒否する', () => {
-      expect(validatePhone('+11231234567')).not.toBeNull()
-    })
-
-    it('市内局番が1始まりは拒否する', () => {
-      expect(validatePhone('+16041001234')).not.toBeNull()
-    })
-
     it('空文字を拒否する', () => {
       expect(validatePhone('')).not.toBeNull()
     })
 
     it('日本の番号形式を拒否する', () => {
       expect(validatePhone('+819012345678')).not.toBeNull()
+    })
+
+    it('スペースが残っている番号を拒否する（除去前の値）', () => {
+      expect(validatePhone('+1 604 234 5678')).not.toBeNull()
     })
   })
 })

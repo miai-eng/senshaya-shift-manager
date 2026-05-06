@@ -22,7 +22,7 @@ function parseFormData(formData: FormData): {
   errors?: EmployeeState['fieldErrors']
 } {
   const name = (formData.get('name') as string | null)?.trim()
-  const phone = (formData.get('phone') as string | null)?.trim()
+  const phone = (formData.get('phone') as string | null)?.replace(/\s/g, '')
   const visa_type = (formData.get('visa_type') as string | null)?.trim() || null
   const weeklyRaw = (formData.get('weekly_hour_limit') as string | null)?.trim()
   const notes = (formData.get('notes') as string | null)?.trim() || null
@@ -82,6 +82,7 @@ export async function createEmployee(
     )
   }
 
+  revalidatePath('/employees')
   redirect('/employees')
 }
 
@@ -113,6 +114,7 @@ export async function updateEmployee(
     )
   }
 
+  revalidatePath('/employees')
   redirect('/employees')
 }
 
