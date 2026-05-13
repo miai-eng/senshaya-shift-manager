@@ -55,7 +55,7 @@ function parseFormData(formData: FormData): {
 
 export async function createEmployee(
   _prevState: EmployeeState,
-  formData: FormData
+  formData: FormData,
 ): Promise<EmployeeState> {
   await requireManager()
 
@@ -72,7 +72,7 @@ export async function createEmployee(
 
 export async function updateEmployee(
   _prevState: EmployeeState,
-  formData: FormData
+  formData: FormData,
 ): Promise<EmployeeState> {
   await requireManager()
 

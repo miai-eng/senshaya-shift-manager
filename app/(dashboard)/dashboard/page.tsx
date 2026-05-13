@@ -12,10 +12,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Link
-          href="/employees"
-          className="rounded border border-zinc-200 p-4 hover:bg-zinc-50"
-        >
+        <Link href="/employees" className="rounded border border-zinc-200 p-4 hover:bg-zinc-50">
           <div className="font-semibold">従業員管理</div>
           <div className="mt-1 text-sm text-zinc-500">従業員の追加・編集・アーカイブ</div>
         </Link>

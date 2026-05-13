@@ -28,9 +28,9 @@ export default async function EmployeesPage({
   await requireManager()
 
   const { q = '', status = 'active' } = await searchParams
-  const currentStatus = (['active', 'archived', 'all'].includes(status)
-    ? status
-    : 'active') as Status
+  const currentStatus = (
+    ['active', 'archived', 'all'].includes(status) ? status : 'active'
+  ) as Status
 
   const supabase = await createClient()
   let query = supabase
@@ -103,10 +103,10 @@ export default async function EmployeesPage({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-200 text-left text-xs text-zinc-500">
-                <th className="pb-2 pr-4 font-medium">氏名</th>
-                <th className="pb-2 pr-4 font-medium">電話番号</th>
-                <th className="pb-2 pr-4 font-medium">ビザ種別</th>
-                <th className="pb-2 pr-4 font-medium">週間上限</th>
+                <th className="pr-4 pb-2 font-medium">氏名</th>
+                <th className="pr-4 pb-2 font-medium">電話番号</th>
+                <th className="pr-4 pb-2 font-medium">ビザ種別</th>
+                <th className="pr-4 pb-2 font-medium">週間上限</th>
                 <th className="pb-2 font-medium"></th>
               </tr>
             </thead>

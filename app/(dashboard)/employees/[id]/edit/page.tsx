@@ -5,11 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { EmployeeForm } from '@/components/features/employee-form'
 import { updateEmployee } from '../../actions'
 
-export default async function EditEmployeePage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function EditEmployeePage({ params }: { params: Promise<{ id: string }> }) {
   await requireManager()
 
   const { id } = await params
