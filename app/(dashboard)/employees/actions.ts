@@ -54,7 +54,10 @@ function parseFormData(formData: FormData): {
 }
 
 function parseOffDays(formData: FormData): number[] {
-  return formData.getAll('day_of_week').map((v) => parseInt(v as string, 10))
+  return formData
+    .getAll('day_of_week')
+    .map((v) => parseInt(v as string, 10))
+    .filter((n) => !isNaN(n) && n >= 0 && n <= 6)
 }
 
 export async function createEmployee(
@@ -107,11 +110,25 @@ export async function updateEmployee(
   if (error) return { error: '保存に失敗しました。時間を置いて再度お試しください。' }
 
   const offDays = parseOffDays(formData)
-  await supabase.from('recurring_days_off').delete().eq('employee_id', id)
-  if (offDays.length > 0) {
+  const { data: existing } = await supabase
+    .from('recurring_days_off')
+    .select('day_of_week')
+    .eq('employee_id', id)
+  const oldSet = new Set(existing?.map((r) => r.day_of_week) ?? [])
+  const newSet = new Set(offDays)
+  const toRemove = [...oldSet].filter((d) => !newSet.has(d))
+  const toAdd = [...newSet].filter((d) => !oldSet.has(d))
+  if (toRemove.length > 0) {
     await supabase
       .from('recurring_days_off')
-      .insert(offDays.map((day) => ({ employee_id: id, day_of_week: day })))
+      .delete()
+      .eq('employee_id', id)
+      .in('day_of_week', toRemove)
+  }
+  if (toAdd.length > 0) {
+    await supabase
+      .from('recurring_days_off')
+      .insert(toAdd.map((d) => ({ employee_id: id, day_of_week: d })))
   }
 
   revalidatePath('/employees')
@@ -146,25 +163,4 @@ export async function restoreEmployee(formData: FormData): Promise<void> {
   if (error) throw new Error('復元に失敗しました')
 
   revalidatePath('/employees')
-}
-
-// day_of_week: 0=日 〜 6=土
-export async function updateRecurringDaysOff(formData: FormData): Promise<void> {
-  await requireManager()
-
-  const employeeId = formData.get('employee_id') as string
-  const selected = formData.getAll('day_of_week').map((v) => parseInt(v as string, 10))
-
-  const supabase = await createClient()
-
-  // 既存レコードを全削除してから選択分を挿入（シンプルな置き換え）
-  await supabase.from('recurring_days_off').delete().eq('employee_id', employeeId)
-
-  if (selected.length > 0) {
-    await supabase
-      .from('recurring_days_off')
-      .insert(selected.map((day) => ({ employee_id: employeeId, day_of_week: day })))
-  }
-
-  revalidatePath(`/employees/${employeeId}/edit`)
 }
