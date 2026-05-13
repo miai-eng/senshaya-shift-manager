@@ -105,10 +105,10 @@ export default async function DaysOffPage({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-200 text-left text-xs text-zinc-500">
-                <th className="pb-2 pr-4 font-medium">従業員</th>
-                <th className="pb-2 pr-4 font-medium">開始日</th>
-                <th className="pb-2 pr-4 font-medium">終了日</th>
-                <th className="pb-2 pr-4 font-medium">理由</th>
+                <th className="pr-4 pb-2 font-medium">従業員</th>
+                <th className="pr-4 pb-2 font-medium">開始日</th>
+                <th className="pr-4 pb-2 font-medium">終了日</th>
+                <th className="pr-4 pb-2 font-medium">理由</th>
                 <th className="pb-2 font-medium"></th>
               </tr>
             </thead>

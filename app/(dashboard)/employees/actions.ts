@@ -59,7 +59,7 @@ function parseOffDays(formData: FormData): number[] {
 
 export async function createEmployee(
   _prevState: EmployeeState,
-  formData: FormData
+  formData: FormData,
 ): Promise<EmployeeState> {
   await requireManager()
 
@@ -77,9 +77,9 @@ export async function createEmployee(
 
   const offDays = parseOffDays(formData)
   if (offDays.length > 0) {
-    await supabase.from('recurring_days_off').insert(
-      offDays.map((day) => ({ employee_id: inserted.id, day_of_week: day }))
-    )
+    await supabase
+      .from('recurring_days_off')
+      .insert(offDays.map((day) => ({ employee_id: inserted.id, day_of_week: day })))
   }
 
   revalidatePath('/employees')
@@ -88,7 +88,7 @@ export async function createEmployee(
 
 export async function updateEmployee(
   _prevState: EmployeeState,
-  formData: FormData
+  formData: FormData,
 ): Promise<EmployeeState> {
   await requireManager()
 
@@ -109,9 +109,9 @@ export async function updateEmployee(
   const offDays = parseOffDays(formData)
   await supabase.from('recurring_days_off').delete().eq('employee_id', id)
   if (offDays.length > 0) {
-    await supabase.from('recurring_days_off').insert(
-      offDays.map((day) => ({ employee_id: id, day_of_week: day }))
-    )
+    await supabase
+      .from('recurring_days_off')
+      .insert(offDays.map((day) => ({ employee_id: id, day_of_week: day })))
   }
 
   revalidatePath('/employees')
@@ -123,10 +123,12 @@ export async function archiveEmployee(formData: FormData): Promise<void> {
 
   const id = formData.get('id') as string
   const supabase = await createClient()
-  await supabase
+  const { error } = await supabase
     .from('employees')
     .update({ is_active: false, updated_at: new Date().toISOString() })
     .eq('id', id)
+
+  if (error) throw new Error('アーカイブに失敗しました')
 
   revalidatePath('/employees')
 }
@@ -136,10 +138,12 @@ export async function restoreEmployee(formData: FormData): Promise<void> {
 
   const id = formData.get('id') as string
   const supabase = await createClient()
-  await supabase
+  const { error } = await supabase
     .from('employees')
     .update({ is_active: true, updated_at: new Date().toISOString() })
     .eq('id', id)
+
+  if (error) throw new Error('復元に失敗しました')
 
   revalidatePath('/employees')
 }
@@ -157,9 +161,9 @@ export async function updateRecurringDaysOff(formData: FormData): Promise<void> 
   await supabase.from('recurring_days_off').delete().eq('employee_id', employeeId)
 
   if (selected.length > 0) {
-    await supabase.from('recurring_days_off').insert(
-      selected.map((day) => ({ employee_id: employeeId, day_of_week: day }))
-    )
+    await supabase
+      .from('recurring_days_off')
+      .insert(selected.map((day) => ({ employee_id: employeeId, day_of_week: day })))
   }
 
   revalidatePath(`/employees/${employeeId}/edit`)

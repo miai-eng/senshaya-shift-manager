@@ -21,7 +21,11 @@ interface EmployeeFormProps {
   defaultOffDays?: number[]
 }
 
-export function EmployeeForm({ action, defaultValues = {}, defaultOffDays = [] }: EmployeeFormProps) {
+export function EmployeeForm({
+  action,
+  defaultValues = {},
+  defaultOffDays = [],
+}: EmployeeFormProps) {
   const [state, formAction] = useActionState(action, {})
   const [offDays, setOffDays] = useState(new Set(defaultOffDays))
 

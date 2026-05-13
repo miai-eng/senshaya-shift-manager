@@ -5,11 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { DaysOffForm } from '@/components/features/days-off-form'
 import { updateDaysOff } from '../../actions'
 
-export default async function EditDaysOffPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function EditDaysOffPage({ params }: { params: Promise<{ id: string }> }) {
   await requireManager()
 
   const { id } = await params

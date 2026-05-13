@@ -15,7 +15,7 @@ async function checkOverlap(
   employeeId: string,
   startDate: string,
   endDate: string,
-  excludeId?: string
+  excludeId?: string,
 ): Promise<boolean> {
   let query = supabase
     .from('requested_days_off')
@@ -50,12 +50,14 @@ function parseDaysOffForm(formData: FormData): {
 
   if (Object.keys(errors).length > 0) return { errors }
 
-  return { data: { employee_id: employee_id!, start_date: start_date!, end_date: end_date!, reason } }
+  return {
+    data: { employee_id: employee_id!, start_date: start_date!, end_date: end_date!, reason },
+  }
 }
 
 export async function createDaysOff(
   _prevState: DaysOffState,
-  formData: FormData
+  formData: FormData,
 ): Promise<DaysOffState> {
   await requireManager()
 
@@ -65,7 +67,9 @@ export async function createDaysOff(
   const supabase = await createClient()
   const overlaps = await checkOverlap(supabase, data!.employee_id, data!.start_date, data!.end_date)
   if (overlaps) {
-    return { fieldErrors: { start_date: 'この期間はすでに登録されているリクエストオフと重複しています' } }
+    return {
+      fieldErrors: { start_date: 'この期間はすでに登録されているリクエストオフと重複しています' },
+    }
   }
 
   const { error } = await supabase.from('requested_days_off').insert(data!)
@@ -77,7 +81,7 @@ export async function createDaysOff(
 
 export async function updateDaysOff(
   _prevState: DaysOffState,
-  formData: FormData
+  formData: FormData,
 ): Promise<DaysOffState> {
   await requireManager()
 
@@ -88,9 +92,17 @@ export async function updateDaysOff(
   if (errors) return { fieldErrors: errors }
 
   const supabase = await createClient()
-  const overlaps = await checkOverlap(supabase, data!.employee_id, data!.start_date, data!.end_date, id)
+  const overlaps = await checkOverlap(
+    supabase,
+    data!.employee_id,
+    data!.start_date,
+    data!.end_date,
+    id,
+  )
   if (overlaps) {
-    return { fieldErrors: { start_date: 'この期間はすでに登録されているリクエストオフと重複しています' } }
+    return {
+      fieldErrors: { start_date: 'この期間はすでに登録されているリクエストオフと重複しています' },
+    }
   }
 
   const { error } = await supabase.from('requested_days_off').update(data!).eq('id', id)

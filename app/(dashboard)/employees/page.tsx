@@ -31,20 +31,25 @@ export default async function EmployeesPage({
   await requireManager()
 
   const { q = '', status = 'active' } = await searchParams
-  const currentStatus = (['active', 'archived', 'all'].includes(status)
-    ? status
-    : 'active') as Status
+  const currentStatus = (
+    ['active', 'archived', 'all'].includes(status) ? status : 'active'
+  ) as Status
 
   const supabase = await createClient()
   let query = supabase
     .from('employees')
-    .select('id, name, phone, visa_type, weekly_hour_limit, is_active, recurring_days_off(day_of_week)')
+    .select(
+      'id, name, phone, visa_type, weekly_hour_limit, is_active, recurring_days_off(day_of_week)',
+    )
     .order('name')
 
   if (currentStatus === 'active') query = query.eq('is_active', true)
   else if (currentStatus === 'archived') query = query.eq('is_active', false)
 
-  if (q.trim()) query = query.ilike('name', `%${q.trim()}%`)
+  if (q.trim()) {
+    const escaped = q.trim().replace(/[%_\\]/g, '\\$&')
+    query = query.ilike('name', `%${escaped}%`)
+  }
 
   const { data: employees } = await query
 
@@ -103,11 +108,11 @@ export default async function EmployeesPage({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-200 text-left text-xs text-zinc-500">
-                <th className="pb-2 pr-4 font-medium">氏名</th>
-                <th className="pb-2 pr-4 font-medium">電話番号</th>
-                <th className="pb-2 pr-4 font-medium">ビザ種別</th>
-                <th className="pb-2 pr-4 font-medium">週間上限</th>
-                <th className="pb-2 pr-4 font-medium">定期休み</th>
+                <th className="pr-4 pb-2 font-medium">氏名</th>
+                <th className="pr-4 pb-2 font-medium">電話番号</th>
+                <th className="pr-4 pb-2 font-medium">ビザ種別</th>
+                <th className="pr-4 pb-2 font-medium">週間上限</th>
+                <th className="pr-4 pb-2 font-medium">定期休み</th>
                 <th className="pb-2 font-medium"></th>
               </tr>
             </thead>
@@ -115,7 +120,9 @@ export default async function EmployeesPage({
               {(employees as Employee[]).map((emp) => (
                 <tr key={emp.id} className={emp.is_active ? '' : 'opacity-50'}>
                   <td className="py-3 pr-4 font-medium">{emp.name}</td>
-                  <td className="py-3 pr-4 font-mono text-xs">{emp.phone}</td>
+                  <td className="py-3 pr-4 font-mono text-xs">
+                    {'*'.repeat(emp.phone.length - 4) + emp.phone.slice(-4)}
+                  </td>
                   <td className="py-3 pr-4 text-zinc-600">{emp.visa_type ?? '—'}</td>
                   <td className="py-3 pr-4 text-zinc-600">
                     {emp.weekly_hour_limit != null ? `${emp.weekly_hour_limit}h` : '—'}

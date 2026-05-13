@@ -1,14 +1,13 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { requireManager } from '@/lib/auth/manager'
 import { createClient } from '@/lib/supabase/server'
 import { EmployeeForm } from '@/components/features/employee-form'
 import { updateEmployee } from '../../actions'
 
-export default async function EditEmployeePage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function EditEmployeePage({ params }: { params: Promise<{ id: string }> }) {
+  await requireManager()
+
   const { id } = await params
   const supabase = await createClient()
 
@@ -18,10 +17,7 @@ export default async function EditEmployeePage({
       .select('id, name, phone, visa_type, weekly_hour_limit, notes')
       .eq('id', id)
       .single(),
-    supabase
-      .from('recurring_days_off')
-      .select('day_of_week')
-      .eq('employee_id', id),
+    supabase.from('recurring_days_off').select('day_of_week').eq('employee_id', id),
   ])
 
   if (!employee) notFound()
