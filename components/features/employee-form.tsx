@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useActionState } from 'react'
 import type { EmployeeState } from '@/app/(dashboard)/employees/actions'
 
@@ -25,8 +26,21 @@ export function EmployeeForm({
   defaultValues = {},
   defaultOffDays = [],
 }: EmployeeFormProps) {
-  const offDaySet = new Set(defaultOffDays)
   const [state, formAction] = useActionState(action, {})
+  const [offDays, setOffDays] = useState(new Set(defaultOffDays))
+
+  const [fields, setFields] = useState({
+    name: defaultValues.name ?? '',
+    phone: defaultValues.phone ?? '',
+    visa_type: defaultValues.visa_type ?? '',
+    weekly_hour_limit: defaultValues.weekly_hour_limit?.toString() ?? '',
+    notes: defaultValues.notes ?? '',
+  })
+
+  const update =
+    (key: keyof typeof fields) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+      setFields((prev) => ({ ...prev, [key]: e.target.value }))
 
   return (
     <form action={formAction} className="space-y-5">
@@ -46,7 +60,8 @@ export function EmployeeForm({
           id="name"
           name="name"
           type="text"
-          defaultValue={defaultValues.name}
+          value={fields.name}
+          onChange={update('name')}
           className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
         />
         {state.fieldErrors?.name && (
@@ -62,11 +77,12 @@ export function EmployeeForm({
           id="phone"
           name="phone"
           type="tel"
-          defaultValue={defaultValues.phone}
+          value={fields.phone}
+          onChange={update('phone')}
           placeholder="+16041234567"
           className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
         />
-        <p className="text-xs text-zinc-500">E.164形式（+1 から始まる11桁）</p>
+        <p className="text-xs text-zinc-500">+1 などから始まる11桁（ハイフン不要）</p>
         {state.fieldErrors?.phone && (
           <p className="text-xs text-red-600">{state.fieldErrors.phone}</p>
         )}
@@ -76,14 +92,20 @@ export function EmployeeForm({
         <label htmlFor="visa_type" className="block text-sm font-medium">
           ビザ種別
         </label>
-        <input
+        <select
           id="visa_type"
           name="visa_type"
-          type="text"
-          defaultValue={defaultValues.visa_type ?? ''}
-          placeholder="例: Work Permit, PR, Working Holiday"
+          value={fields.visa_type}
+          onChange={update('visa_type')}
           className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
-        />
+        >
+          <option value="">選択してください</option>
+          <option value="Working Holiday">Working Holiday</option>
+          <option value="Study Permit">Study Permit</option>
+          <option value="Work Permit">Work Permit</option>
+          <option value="PR">PR</option>
+          <option value="Others">Others</option>
+        </select>
       </div>
 
       <div className="space-y-1">
@@ -95,7 +117,8 @@ export function EmployeeForm({
           name="weekly_hour_limit"
           type="number"
           min={1}
-          defaultValue={defaultValues.weekly_hour_limit ?? ''}
+          value={fields.weekly_hour_limit}
+          onChange={update('weekly_hour_limit')}
           className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
         />
         {state.fieldErrors?.weekly_hour_limit && (
@@ -111,7 +134,8 @@ export function EmployeeForm({
           id="notes"
           name="notes"
           rows={3}
-          defaultValue={defaultValues.notes ?? ''}
+          value={fields.notes}
+          onChange={update('notes')}
           className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
         />
       </div>
@@ -125,7 +149,14 @@ export function EmployeeForm({
                 type="checkbox"
                 name="day_of_week"
                 value={dow}
-                defaultChecked={offDaySet.has(dow)}
+                checked={offDays.has(dow)}
+                onChange={(e) => {
+                  setOffDays((prev) => {
+                    const next = new Set(prev)
+                    e.target.checked ? next.add(dow) : next.delete(dow)
+                    return next
+                  })
+                }}
                 className="rounded border-zinc-400"
               />
               {label}

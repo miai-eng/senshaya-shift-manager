@@ -3,6 +3,8 @@ import { requireManager } from '@/lib/auth/manager'
 import { createClient } from '@/lib/supabase/server'
 import { archiveEmployee, restoreEmployee } from './actions'
 
+const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
+
 type Employee = {
   id: string
   name: string
@@ -10,6 +12,7 @@ type Employee = {
   visa_type: string | null
   weekly_hour_limit: number | null
   is_active: boolean
+  recurring_days_off: { day_of_week: number }[]
 }
 
 type Status = 'active' | 'archived' | 'all'
@@ -35,7 +38,9 @@ export default async function EmployeesPage({
   const supabase = await createClient()
   let query = supabase
     .from('employees')
-    .select('id, name, phone, visa_type, weekly_hour_limit, is_active')
+    .select(
+      'id, name, phone, visa_type, weekly_hour_limit, is_active, recurring_days_off(day_of_week)',
+    )
     .order('name')
 
   if (currentStatus === 'active') query = query.eq('is_active', true)
@@ -107,6 +112,7 @@ export default async function EmployeesPage({
                 <th className="pr-4 pb-2 font-medium">電話番号</th>
                 <th className="pr-4 pb-2 font-medium">ビザ種別</th>
                 <th className="pr-4 pb-2 font-medium">週間上限</th>
+                <th className="pr-4 pb-2 font-medium">定期休み</th>
                 <th className="pb-2 font-medium"></th>
               </tr>
             </thead>
@@ -120,6 +126,14 @@ export default async function EmployeesPage({
                   <td className="py-3 pr-4 text-zinc-600">{emp.visa_type ?? '—'}</td>
                   <td className="py-3 pr-4 text-zinc-600">
                     {emp.weekly_hour_limit != null ? `${emp.weekly_hour_limit}h` : '—'}
+                  </td>
+                  <td className="py-3 pr-4 text-zinc-600">
+                    {emp.recurring_days_off.length > 0
+                      ? emp.recurring_days_off
+                          .map((d) => DAY_LABELS[d.day_of_week])
+                          .sort((a, b) => DAY_LABELS.indexOf(a) - DAY_LABELS.indexOf(b))
+                          .join('・')
+                      : '—'}
                   </td>
                   <td className="py-3">
                     <div className="flex gap-2">
