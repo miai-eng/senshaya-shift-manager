@@ -17,10 +17,7 @@ export default async function EditEmployeePage({ params }: { params: Promise<{ i
       .select('id, name, phone, visa_type, weekly_hour_limit, notes')
       .eq('id', id)
       .single(),
-    supabase
-      .from('recurring_days_off')
-      .select('day_of_week')
-      .eq('employee_id', id),
+    supabase.from('recurring_days_off').select('day_of_week').eq('employee_id', id),
   ])
 
   if (!employee) notFound()

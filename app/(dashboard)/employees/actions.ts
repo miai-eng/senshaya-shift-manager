@@ -80,9 +80,9 @@ export async function createEmployee(
 
   const offDays = parseOffDays(formData)
   if (offDays.length > 0) {
-    await supabase.from('recurring_days_off').insert(
-      offDays.map((day) => ({ employee_id: inserted.id, day_of_week: day }))
-    )
+    await supabase
+      .from('recurring_days_off')
+      .insert(offDays.map((day) => ({ employee_id: inserted.id, day_of_week: day })))
   }
 
   redirect('/employees')
@@ -118,10 +118,16 @@ export async function updateEmployee(
   const toRemove = [...oldSet].filter((d) => !newSet.has(d))
   const toAdd = [...newSet].filter((d) => !oldSet.has(d))
   if (toRemove.length > 0) {
-    await supabase.from('recurring_days_off').delete().eq('employee_id', id).in('day_of_week', toRemove)
+    await supabase
+      .from('recurring_days_off')
+      .delete()
+      .eq('employee_id', id)
+      .in('day_of_week', toRemove)
   }
   if (toAdd.length > 0) {
-    await supabase.from('recurring_days_off').insert(toAdd.map((d) => ({ employee_id: id, day_of_week: d })))
+    await supabase
+      .from('recurring_days_off')
+      .insert(toAdd.map((d) => ({ employee_id: id, day_of_week: d })))
   }
 
   redirect('/employees')
@@ -156,4 +162,3 @@ export async function restoreEmployee(formData: FormData): Promise<void> {
 
   revalidatePath('/employees')
 }
-
