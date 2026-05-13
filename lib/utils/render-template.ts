@@ -17,6 +17,6 @@ export function renderTemplate(template: string, vars: TemplateVars): string {
       const key = placeholder!.slice(1, -1)
       const value = vars[key as keyof TemplateVars]
       return value != null ? value : placeholder!
-    }
+    },
   )
 }

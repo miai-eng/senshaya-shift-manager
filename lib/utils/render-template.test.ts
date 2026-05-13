@@ -5,14 +5,14 @@ describe('renderTemplate', () => {
   describe('変数置換', () => {
     it('{date} を置換する', () => {
       expect(renderTemplate('明日 {date} はお休みです', { date: '4月26日(日)' })).toBe(
-        '明日 4月26日(日) はお休みです'
+        '明日 4月26日(日) はお休みです',
       )
     })
 
     it('{time} を置換する', () => {
-      expect(renderTemplate('{date} は {time} からです', { date: '4月26日(日)', time: '9:00' })).toBe(
-        '4月26日(日) は 9:00 からです'
-      )
+      expect(
+        renderTemplate('{date} は {time} からです', { date: '4月26日(日)', time: '9:00' }),
+      ).toBe('4月26日(日) は 9:00 からです')
     })
 
     it('vars にない変数は原文のまま残す', () => {
@@ -21,7 +21,7 @@ describe('renderTemplate', () => {
 
     it('値が undefined の変数は原文のまま残す', () => {
       expect(renderTemplate('{date} は {time} からです', { date: '4月26日(日)' })).toBe(
-        '4月26日(日) は {time} からです'
+        '4月26日(日) は {time} からです',
       )
     })
   })
@@ -37,7 +37,7 @@ describe('renderTemplate', () => {
 
     it('エスケープされた変数は置換しない', () => {
       expect(renderTemplate('\\{date\\} と {date}', { date: '4月26日(日)' })).toBe(
-        '{date} と 4月26日(日)'
+        '{date} と 4月26日(日)',
       )
     })
   })
@@ -45,13 +45,13 @@ describe('renderTemplate', () => {
   describe('サンプルテンプレート', () => {
     it('出勤時テンプレートを正しく置換する', () => {
       expect(
-        renderTemplate('明日 {date} は {time} からです', { date: '4月26日(日)', time: '9:00' })
+        renderTemplate('明日 {date} は {time} からです', { date: '4月26日(日)', time: '9:00' }),
       ).toBe('明日 4月26日(日) は 9:00 からです')
     })
 
     it('休みテンプレートを正しく置換する', () => {
       expect(renderTemplate('明日 {date} はお休みです', { date: '4月26日(日)' })).toBe(
-        '明日 4月26日(日) はお休みです'
+        '明日 4月26日(日) はお休みです',
       )
     })
   })
@@ -67,7 +67,7 @@ describe('renderTemplate', () => {
 
     it('テンプレート本文中の改行はそのまま出力する', () => {
       expect(renderTemplate('1行目\n2行目 {date}', { date: '4月26日(日)' })).toBe(
-        '1行目\n2行目 4月26日(日)'
+        '1行目\n2行目 4月26日(日)',
       )
     })
   })

@@ -38,9 +38,7 @@ export default async function TemplatesPage({
     .select('type, body')
     .order('type')
 
-  const templateMap = Object.fromEntries(
-    (templates ?? []).map((t: Template) => [t.type, t.body])
-  )
+  const templateMap = Object.fromEntries((templates ?? []).map((t: Template) => [t.type, t.body]))
 
   return (
     <div className="space-y-8">
