@@ -1,5 +1,6 @@
 import { requireManager } from '@/lib/auth/manager'
 import { createClient } from '@/lib/supabase/server'
+import { TemplateForm } from '@/components/features/template-form'
 import { updateTemplate } from './actions'
 
 const TEMPLATE_LABELS: Record<string, string> = {
@@ -60,29 +61,12 @@ export default async function TemplatesPage({
         {(['attend', 'off'] as const).map((type) => (
           <div key={type} className="space-y-3 rounded border border-zinc-200 p-4">
             <h2 className="font-semibold">{TEMPLATE_LABELS[type]}</h2>
-            <form action={updateTemplate} className="space-y-3">
-              <input type="hidden" name="type" value={type} />
-              <textarea
-                name="body"
-                defaultValue={templateMap[type] ?? ''}
-                rows={3}
-                className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
-              />
-              <p className="text-xs text-zinc-500">
-                利用可能な変数:{' '}
-                {TEMPLATE_HINTS[type].map((v) => (
-                  <code key={v} className="mr-2 rounded bg-zinc-100 px-1 py-0.5 font-mono">
-                    {v}
-                  </code>
-                ))}
-              </p>
-              <button
-                type="submit"
-                className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
-              >
-                保存する
-              </button>
-            </form>
+            <TemplateForm
+              type={type}
+              defaultBody={templateMap[type] ?? ''}
+              hints={TEMPLATE_HINTS[type]}
+              action={updateTemplate}
+            />
           </div>
         ))}
       </div>
