@@ -14,7 +14,7 @@ export default async function EditEmployeePage({ params }: { params: Promise<{ i
   const [{ data: employee }, { data: recurringDaysOff }] = await Promise.all([
     supabase
       .from('employees')
-      .select('id, name, phone, visa_type, weekly_hour_limit, notes')
+      .select('id, name, phone, visa_type, weekly_hour_limit, notes, is_manager')
       .eq('id', id)
       .single(),
     supabase.from('recurring_days_off').select('day_of_week').eq('employee_id', id),

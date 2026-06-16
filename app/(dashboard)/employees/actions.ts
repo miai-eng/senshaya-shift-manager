@@ -18,6 +18,7 @@ function parseFormData(formData: FormData): {
     visa_type: string | null
     weekly_hour_limit: number | null
     notes: string | null
+    is_manager: boolean
   }
   errors?: EmployeeState['fieldErrors']
 } {
@@ -26,6 +27,7 @@ function parseFormData(formData: FormData): {
   const visa_type = (formData.get('visa_type') as string | null)?.trim() || null
   const weeklyRaw = (formData.get('weekly_hour_limit') as string | null)?.trim()
   const notes = (formData.get('notes') as string | null)?.trim() || null
+  const is_manager = formData.get('is_manager') === 'true'
 
   const errors: EmployeeState['fieldErrors'] = {}
 
@@ -50,7 +52,7 @@ function parseFormData(formData: FormData): {
 
   if (Object.keys(errors).length > 0) return { errors }
 
-  return { data: { name: name!, phone: phone!, visa_type, weekly_hour_limit, notes } }
+  return { data: { name: name!, phone: phone!, visa_type, weekly_hour_limit, notes, is_manager } }
 }
 
 function parseOffDays(formData: FormData): number[] {
