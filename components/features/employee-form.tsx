@@ -17,6 +17,7 @@ interface EmployeeFormProps {
     visa_type?: string | null
     weekly_hour_limit?: number | null
     notes?: string | null
+    is_manager?: boolean
   }
   defaultOffDays?: number[]
 }
@@ -28,6 +29,7 @@ export function EmployeeForm({
 }: EmployeeFormProps) {
   const [state, formAction] = useActionState(action, {})
   const [offDays, setOffDays] = useState(new Set(defaultOffDays))
+  const [isManager, setIsManager] = useState(defaultValues.is_manager ?? false)
 
   const [fields, setFields] = useState({
     name: defaultValues.name ?? '',
@@ -45,6 +47,7 @@ export function EmployeeForm({
   return (
     <form action={formAction} className="space-y-5">
       {defaultValues.id && <input type="hidden" name="id" value={defaultValues.id} />}
+      <input type="hidden" name="is_manager" value={isManager ? 'true' : 'false'} />
 
       {state.error && (
         <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -138,6 +141,18 @@ export function EmployeeForm({
           onChange={update('notes')}
           className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
         />
+      </div>
+
+      <div className="space-y-1">
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            checked={isManager}
+            onChange={(e) => setIsManager(e.target.checked)}
+            className="rounded border-zinc-400"
+          />
+          マネージャー職（シフト自動入力: 9:00）
+        </label>
       </div>
 
       <div className="space-y-2">
