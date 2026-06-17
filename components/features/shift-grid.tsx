@@ -242,6 +242,7 @@ export function ShiftGrid({
                       : 'text-zinc-700'
                 const isLocked = lockedSet.has(date)
                 const isEditableDate = date === today || date === tomorrow
+                const isPast = date < today
                 return (
                   <th
                     key={date}
@@ -249,7 +250,7 @@ export function ShiftGrid({
                   >
                     <div className="flex flex-col items-center gap-1">
                       <span className={color}>{label}</span>
-                      {isLocked ? (
+                      {isLocked && !isPast ? (
                         <button
                           onClick={() => handleUnlock(date)}
                           disabled={isPending}
@@ -257,7 +258,7 @@ export function ShiftGrid({
                         >
                           🔒 解除
                         </button>
-                      ) : isEditableDate ? (
+                      ) : isEditableDate && !isLocked ? (
                         <button
                           onClick={() => handleLock(date)}
                           disabled={isPending}
