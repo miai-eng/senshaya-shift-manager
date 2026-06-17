@@ -7,6 +7,7 @@ const PUBLIC_PATHS = [
   '/reset-password',
   '/test-connection',
   '/auth/confirm',
+  '/schedule',
 ]
 
 function isPublicPath(pathname: string): boolean {
