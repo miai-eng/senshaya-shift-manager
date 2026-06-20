@@ -2,6 +2,7 @@
 
 import { useOptimistic, useTransition, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { upsertShift, deleteShift, lockDate, unlockDate } from '@/app/(dashboard)/shifts/actions'
 
 const PRESET_TIMES = ['9:00', '10:00', '11:00', '13:00'] as const
@@ -249,13 +250,21 @@ export function ShiftGrid({
                     <div className="flex flex-col items-center gap-1">
                       <span className={color}>{label}</span>
                       {isLocked && !isPast ? (
-                        <button
-                          onClick={() => handleUnlock(date)}
-                          disabled={isPending}
-                          className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs text-zinc-400 hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
-                        >
-                          🔒 Unlock
-                        </button>
+                        <div className="flex flex-col items-center gap-0.5">
+                          <Link
+                            href={`/shifts/${date}/messages`}
+                            className="rounded px-1.5 py-0.5 text-xs text-zinc-500 hover:bg-zinc-100"
+                          >
+                            Messages
+                          </Link>
+                          <button
+                            onClick={() => handleUnlock(date)}
+                            disabled={isPending}
+                            className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs text-zinc-400 hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
+                          >
+                            🔒 Unlock
+                          </button>
+                        </div>
                       ) : isEditableDate && !isLocked ? (
                         <button
                           onClick={() => handleLock(date)}
