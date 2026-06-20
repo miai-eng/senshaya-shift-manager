@@ -28,9 +28,9 @@ export default async function EditEmployeePage({ params }: { params: Promise<{ i
     <div className="space-y-8">
       <div className="flex items-center gap-4">
         <Link href="/employees" className="text-sm text-zinc-500 hover:text-zinc-700">
-          ← 従業員一覧
+          ← Employees
         </Link>
-        <h1 className="text-2xl font-bold">従業員を編集</h1>
+        <h1 className="text-2xl font-bold">Edit Employee</h1>
       </div>
 
       <div className="max-w-lg">

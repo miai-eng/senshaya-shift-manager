@@ -47,7 +47,7 @@ export function DaysOffForm({ action, employees, defaultValues = {} }: DaysOffFo
 
       <div className="space-y-1">
         <label htmlFor="employee_id" className="block text-sm font-medium">
-          従業員 <span className="text-red-500">*</span>
+          Employee <span className="text-red-500">*</span>
         </label>
         <select
           id="employee_id"
@@ -56,7 +56,7 @@ export function DaysOffForm({ action, employees, defaultValues = {} }: DaysOffFo
           onChange={update('employee_id')}
           className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
         >
-          <option value="">選択してください</option>
+          <option value="">Select employee</option>
           {employees.map((e) => (
             <option key={e.id} value={e.id}>
               {e.name}
@@ -71,7 +71,7 @@ export function DaysOffForm({ action, employees, defaultValues = {} }: DaysOffFo
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
           <label htmlFor="start_date" className="block text-sm font-medium">
-            開始日 <span className="text-red-500">*</span>
+            Start date <span className="text-red-500">*</span>
           </label>
           <input
             id="start_date"
@@ -87,7 +87,7 @@ export function DaysOffForm({ action, employees, defaultValues = {} }: DaysOffFo
         </div>
         <div className="space-y-1">
           <label htmlFor="end_date" className="block text-sm font-medium">
-            終了日 <span className="text-red-500">*</span>
+            End date <span className="text-red-500">*</span>
           </label>
           <input
             id="end_date"
@@ -105,7 +105,7 @@ export function DaysOffForm({ action, employees, defaultValues = {} }: DaysOffFo
 
       <div className="space-y-1">
         <label htmlFor="reason" className="block text-sm font-medium">
-          理由
+          Reason
         </label>
         <textarea
           id="reason"
@@ -121,7 +121,7 @@ export function DaysOffForm({ action, employees, defaultValues = {} }: DaysOffFo
         type="submit"
         className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
       >
-        保存する
+        Save
       </button>
     </form>
   )

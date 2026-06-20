@@ -4,8 +4,8 @@ import { TemplateForm } from '@/components/features/template-form'
 import { updateTemplate } from './actions'
 
 const TEMPLATE_LABELS: Record<string, string> = {
-  attend: '出勤時テンプレート',
-  off: '休みテンプレート',
+  attend: 'Attendance template',
+  off: 'Day off template',
 }
 
 const TEMPLATE_HINTS: Record<string, string[]> = {
@@ -14,9 +14,9 @@ const TEMPLATE_HINTS: Record<string, string[]> = {
 }
 
 const ERROR_MESSAGES: Record<string, string> = {
-  invalid_type: 'テンプレートの種類が不正です。',
-  empty_body: 'テンプレート本文を入力してください。',
-  save_failed: '保存に失敗しました。時間を置いて再度お試しください。',
+  invalid_type: 'Invalid template type.',
+  empty_body: 'Template body is required.',
+  save_failed: 'Failed to save. Please try again later.',
 }
 
 type Template = {
@@ -43,7 +43,7 @@ export default async function TemplatesPage({
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">テンプレート設定</h1>
+      <h1 className="text-2xl font-bold">Message Templates</h1>
 
       {error && (
         <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -53,7 +53,7 @@ export default async function TemplatesPage({
 
       {saved && TEMPLATE_LABELS[saved] && (
         <div className="rounded border border-green-200 bg-green-50 p-3 text-sm text-green-800">
-          {TEMPLATE_LABELS[saved]}を保存しました。
+          {TEMPLATE_LABELS[saved]} saved.
         </div>
       )}
 

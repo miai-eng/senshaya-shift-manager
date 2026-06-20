@@ -26,9 +26,9 @@ export default async function EditDaysOffPage({ params }: { params: Promise<{ id
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/days-off" className="text-sm text-zinc-500 hover:text-zinc-700">
-          ← リクエストオフ一覧
+          ← Time Off
         </Link>
-        <h1 className="text-2xl font-bold">リクエストオフを編集</h1>
+        <h1 className="text-2xl font-bold">Edit Time Off</h1>
       </div>
       <div className="max-w-lg">
         <DaysOffForm action={updateDaysOff} employees={employees ?? []} defaultValues={daysOff} />

@@ -3,7 +3,7 @@ import { requireManager } from '@/lib/auth/manager'
 import { createClient } from '@/lib/supabase/server'
 import { archiveEmployee, restoreEmployee } from './actions'
 
-const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
+const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 type Employee = {
   id: string
@@ -18,9 +18,9 @@ type Employee = {
 type Status = 'active' | 'archived' | 'all'
 
 const STATUS_LABELS: Record<Status, string> = {
-  active: 'アクティブ',
-  archived: 'アーカイブ済み',
-  all: 'すべて',
+  active: 'Active',
+  archived: 'Archived',
+  all: 'All',
 }
 
 export default async function EmployeesPage({
@@ -56,21 +56,20 @@ export default async function EmployeesPage({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">従業員管理</h1>
+        <h1 className="text-2xl font-bold">Employees</h1>
         <Link
           href="/employees/new"
           className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
         >
-          ＋ 従業員を追加
+          + Add Employee
         </Link>
       </div>
 
-      {/* 検索・フィルター */}
       <form method="GET" action="/employees" className="flex flex-wrap gap-2">
         <input
           name="q"
           defaultValue={q}
-          placeholder="氏名で検索"
+          placeholder="Search by name"
           className="rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
         />
         <select
@@ -88,31 +87,30 @@ export default async function EmployeesPage({
           type="submit"
           className="rounded border border-zinc-400 px-3 py-2 text-sm hover:bg-zinc-100"
         >
-          絞り込む
+          Filter
         </button>
         {(q || currentStatus !== 'active') && (
           <Link
             href="/employees"
             className="rounded border border-zinc-400 px-3 py-2 text-sm hover:bg-zinc-100"
           >
-            リセット
+            Reset
           </Link>
         )}
       </form>
 
-      {/* 一覧 */}
       {!employees || employees.length === 0 ? (
-        <p className="text-sm text-zinc-500">該当する従業員が見つかりません。</p>
+        <p className="text-sm text-zinc-500">No employees found.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-200 text-left text-xs text-zinc-500">
-                <th className="pr-4 pb-2 font-medium">氏名</th>
-                <th className="pr-4 pb-2 font-medium">電話番号</th>
-                <th className="pr-4 pb-2 font-medium">ビザ種別</th>
-                <th className="pr-4 pb-2 font-medium">週間上限</th>
-                <th className="pr-4 pb-2 font-medium">定期休み</th>
+                <th className="pr-4 pb-2 font-medium">Name</th>
+                <th className="pr-4 pb-2 font-medium">Phone</th>
+                <th className="pr-4 pb-2 font-medium">Visa type</th>
+                <th className="pr-4 pb-2 font-medium">Weekly hrs</th>
+                <th className="pr-4 pb-2 font-medium">Regular days off</th>
                 <th className="pb-2 font-medium"></th>
               </tr>
             </thead>
@@ -132,7 +130,7 @@ export default async function EmployeesPage({
                       ? emp.recurring_days_off
                           .map((d) => DAY_LABELS[d.day_of_week])
                           .sort((a, b) => DAY_LABELS.indexOf(a) - DAY_LABELS.indexOf(b))
-                          .join('・')
+                          .join(', ')
                       : '—'}
                   </td>
                   <td className="py-3">
@@ -141,7 +139,7 @@ export default async function EmployeesPage({
                         href={`/employees/${emp.id}/edit`}
                         className="rounded border border-zinc-300 px-2 py-1 text-xs hover:bg-zinc-100"
                       >
-                        編集
+                        Edit
                       </Link>
                       {emp.is_active ? (
                         <form action={archiveEmployee}>
@@ -150,7 +148,7 @@ export default async function EmployeesPage({
                             type="submit"
                             className="rounded border border-zinc-300 px-2 py-1 text-xs hover:bg-zinc-100"
                           >
-                            アーカイブ
+                            Archive
                           </button>
                         </form>
                       ) : (
@@ -160,7 +158,7 @@ export default async function EmployeesPage({
                             type="submit"
                             className="rounded border border-zinc-300 px-2 py-1 text-xs hover:bg-zinc-100"
                           >
-                            復元
+                            Restore
                           </button>
                         </form>
                       )}

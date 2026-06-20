@@ -24,11 +24,16 @@ function todayInVancouver(): string {
   }).format(new Date())
 }
 
-function defaultStartDate(): string {
-  const today = todayInVancouver()
-  const d = new Date(today + 'T12:00:00Z')
-  d.setUTCDate(d.getUTCDate() - 3)
+function mondayOfWeek(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00Z')
+  const dow = d.getUTCDay() // 0=Sun, 1=Mon, ..., 6=Sat
+  const daysFromMonday = dow === 0 ? 6 : dow - 1
+  d.setUTCDate(d.getUTCDate() - daysFromMonday)
   return d.toISOString().slice(0, 10)
+}
+
+function defaultStartDate(): string {
+  return mondayOfWeek(todayInVancouver())
 }
 
 export default async function ShiftsPage({
@@ -39,7 +44,7 @@ export default async function ShiftsPage({
   await requireManager()
 
   const { date } = await searchParams
-  const startDate = date ?? defaultStartDate()
+  const startDate = date ? mondayOfWeek(date) : defaultStartDate()
   const today = todayInVancouver()
   const dates = buildDateRange(startDate, 7)
   const endDate = dates[dates.length - 1]
@@ -71,7 +76,7 @@ export default async function ShiftsPage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">シフト入力</h1>
+      <h1 className="text-2xl font-bold">Shifts</h1>
       <ShiftGrid
         employees={employees ?? []}
         dates={dates}
