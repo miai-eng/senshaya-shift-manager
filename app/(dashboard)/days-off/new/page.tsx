@@ -18,9 +18,9 @@ export default async function NewDaysOffPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/days-off" className="text-sm text-zinc-500 hover:text-zinc-700">
-          ← リクエストオフ一覧
+          ← Time Off
         </Link>
-        <h1 className="text-2xl font-bold">リクエストオフを追加</h1>
+        <h1 className="text-2xl font-bold">Add Time Off</h1>
       </div>
       <div className="max-w-lg">
         <DaysOffForm action={createDaysOff} employees={employees ?? []} />

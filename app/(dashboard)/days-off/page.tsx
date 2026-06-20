@@ -49,23 +49,22 @@ export default async function DaysOffPage({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">リクエストオフ管理</h1>
+        <h1 className="text-2xl font-bold">Time Off</h1>
         <Link
           href="/days-off/new"
           className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
         >
-          ＋ リクエストオフを追加
+          + Add Time Off
         </Link>
       </div>
 
-      {/* フィルター */}
       <form method="GET" action="/days-off" className="flex flex-wrap gap-2">
         <select
           name="employee_id"
           defaultValue={employee_id}
           className="rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
         >
-          <option value="">全従業員</option>
+          <option value="">All employees</option>
           {(employees ?? []).map((e) => (
             <option key={e.id} value={e.id}>
               {e.name}
@@ -77,38 +76,37 @@ export default async function DaysOffPage({
           defaultValue={period}
           className="rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
         >
-          <option value="upcoming">今後・進行中</option>
-          <option value="past">過去</option>
-          <option value="all">すべて</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="past">Past</option>
+          <option value="all">All</option>
         </select>
         <button
           type="submit"
           className="rounded border border-zinc-400 px-3 py-2 text-sm hover:bg-zinc-100"
         >
-          絞り込む
+          Filter
         </button>
         {(employee_id || period !== 'all') && (
           <Link
             href="/days-off"
             className="rounded border border-zinc-400 px-3 py-2 text-sm hover:bg-zinc-100"
           >
-            リセット
+            Reset
           </Link>
         )}
       </form>
 
-      {/* 一覧 */}
       {!daysOff || daysOff.length === 0 ? (
-        <p className="text-sm text-zinc-500">該当するリクエストオフが見つかりません。</p>
+        <p className="text-sm text-zinc-500">No time off records found.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-200 text-left text-xs text-zinc-500">
-                <th className="pr-4 pb-2 font-medium">従業員</th>
-                <th className="pr-4 pb-2 font-medium">開始日</th>
-                <th className="pr-4 pb-2 font-medium">終了日</th>
-                <th className="pr-4 pb-2 font-medium">理由</th>
+                <th className="pr-4 pb-2 font-medium">Employee</th>
+                <th className="pr-4 pb-2 font-medium">Start date</th>
+                <th className="pr-4 pb-2 font-medium">End date</th>
+                <th className="pr-4 pb-2 font-medium">Reason</th>
                 <th className="pb-2 font-medium"></th>
               </tr>
             </thead>
@@ -125,7 +123,7 @@ export default async function DaysOffPage({
                         href={`/days-off/${d.id}/edit`}
                         className="rounded border border-zinc-300 px-2 py-1 text-xs hover:bg-zinc-100"
                       >
-                        編集
+                        Edit
                       </Link>
                       <form action={deleteDaysOff}>
                         <input type="hidden" name="id" value={d.id} />
@@ -133,7 +131,7 @@ export default async function DaysOffPage({
                           type="submit"
                           className="rounded border border-zinc-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50"
                         >
-                          削除
+                          Delete
                         </button>
                       </form>
                     </div>

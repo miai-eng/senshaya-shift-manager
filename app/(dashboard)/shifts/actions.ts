@@ -35,7 +35,7 @@ export async function upsertShift(
     .from('shifts')
     .upsert(row, { onConflict: 'employee_id,shift_date' })
 
-  if (error) return { error: '保存に失敗しました' }
+  if (error) return { error: 'Failed to save' }
 
   revalidatePath('/shifts')
   return {}
@@ -49,7 +49,7 @@ export async function lockDate(shiftDate: string): Promise<{ error?: string }> {
     .from('shift_locks')
     .upsert({ shift_date: shiftDate }, { onConflict: 'shift_date' })
 
-  if (error) return { error: '確定に失敗しました' }
+  if (error) return { error: 'Failed to confirm' }
 
   revalidatePath('/shifts')
   return {}
@@ -61,7 +61,7 @@ export async function unlockDate(shiftDate: string): Promise<{ error?: string }>
   const supabase = await createClient()
   const { error } = await supabase.from('shift_locks').delete().eq('shift_date', shiftDate)
 
-  if (error) return { error: '確定解除に失敗しました' }
+  if (error) return { error: 'Failed to unlock' }
 
   revalidatePath('/shifts')
   return {}

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { upsertShift, deleteShift, lockDate, unlockDate } from '@/app/(dashboard)/shifts/actions'
 
 const PRESET_TIMES = ['9:00', '10:00', '11:00', '13:00'] as const
-const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'] as const
+const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 
 type Employee = {
   id: string
@@ -102,7 +102,6 @@ export function ShiftGrid({
     },
   )
 
-  // Build requested days off lookup
   const requestedByEmployee = new Map<string, { start_date: string; end_date: string }[]>()
   for (const r of requestedDaysOff) {
     if (!requestedByEmployee.has(r.employee_id)) requestedByEmployee.set(r.employee_id, [])
@@ -186,7 +185,6 @@ export function ShiftGrid({
     router.push(`/shifts?date=${d.toISOString().slice(0, 10)}`)
   }
 
-  // Determine active cell info for the bottom panel
   const activeParts = activeCell ? activeCell.split(':') : null
   const activeEmpId = activeParts ? activeParts[0] : null
   const activeDate = activeParts ? activeParts.slice(1).join(':') : null
@@ -201,27 +199,27 @@ export function ShiftGrid({
           onClick={() => navigate('prev')}
           className="rounded border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-100"
         >
-          ← 前週
+          ← Prev week
         </button>
         <button
           onClick={() => goToDate(0)}
           className="rounded border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-100"
         >
-          今日
+          Today
         </button>
         <button
           onClick={() => goToDate(1)}
           className="rounded border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-100"
         >
-          明日
+          Tomorrow
         </button>
         <button
           onClick={() => navigate('next')}
           className="rounded border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-100"
         >
-          次週 →
+          Next week →
         </button>
-        {isPending && <span className="text-xs text-zinc-400">更新中…</span>}
+        {isPending && <span className="text-xs text-zinc-400">Saving…</span>}
       </div>
 
       {/* Grid */}
@@ -230,7 +228,7 @@ export function ShiftGrid({
           <thead>
             <tr>
               <th className="sticky left-0 z-20 min-w-28 border-b border-r border-zinc-200 bg-white px-3 py-2 text-left text-xs font-medium text-zinc-500">
-                従業員
+                Employee
               </th>
               {dates.map((date) => {
                 const { label, dow } = formatDateHeader(date)
@@ -256,7 +254,7 @@ export function ShiftGrid({
                           disabled={isPending}
                           className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs text-zinc-400 hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
                         >
-                          🔒 解除
+                          🔒 Unlock
                         </button>
                       ) : isEditableDate && !isLocked ? (
                         <button
@@ -264,7 +262,7 @@ export function ShiftGrid({
                           disabled={isPending}
                           className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs text-white hover:bg-zinc-600 disabled:opacity-50"
                         >
-                          確定
+                          Confirm
                         </button>
                       ) : null}
                     </div>
@@ -279,7 +277,7 @@ export function ShiftGrid({
                 <td className="sticky left-0 z-10 border-b border-r border-zinc-200 bg-white px-3 py-2">
                   <div className="font-medium text-zinc-900">{emp.name}</div>
                   {emp.weekly_hour_limit != null && (
-                    <div className="text-xs text-zinc-400">週{emp.weekly_hour_limit}h上限</div>
+                    <div className="text-xs text-zinc-400">{emp.weekly_hour_limit}h/wk</div>
                   )}
                 </td>
                 {dates.map((date) => {
@@ -308,16 +306,16 @@ export function ShiftGrid({
                       >
                         {shift ? (
                           shift.is_off ? (
-                            <span className={`font-medium ${isEditable ? 'text-red-500' : 'text-red-300'}`}>休み</span>
+                            <span className={`font-medium ${isEditable ? 'text-red-500' : 'text-red-300'}`}>Off</span>
                           ) : (
                             <span className={`font-medium ${isEditable ? 'text-zinc-900' : 'text-zinc-400'}`}>
                               {formatTime(shift.start_time!)}
                             </span>
                           )
                         ) : recurringOff ? (
-                          <span className="text-zinc-300">定休</span>
+                          <span className="text-zinc-300">—</span>
                         ) : requestedOff ? (
-                          <span className="text-blue-300 text-xs">オフ申請</span>
+                          <span className="text-blue-300 text-xs">T/O</span>
                         ) : (
                           <span className="text-zinc-300">—</span>
                         )}
@@ -335,11 +333,11 @@ export function ShiftGrid({
       <div className="flex flex-wrap gap-4 text-xs text-zinc-500">
         <span className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded border border-zinc-200 bg-zinc-100" />
-          定期休み
+          Fixed day off
         </span>
         <span className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded border border-blue-100 bg-blue-50" />
-          オフ申請中
+          Time off requested
         </span>
       </div>
 
@@ -401,14 +399,14 @@ export function ShiftGrid({
                       : 'border-red-300 text-red-600 hover:bg-red-50'
                   }`}
                 >
-                  休み
+                  Off
                 </button>
                 {activeShift && (
                   <button
                     onClick={() => handleSelect(activeEmp.id, activeDate, 'clear')}
                     className="rounded border border-zinc-200 py-2 text-sm text-zinc-400 hover:bg-zinc-50"
                   >
-                    クリア
+                    Clear
                   </button>
                 )}
               </div>

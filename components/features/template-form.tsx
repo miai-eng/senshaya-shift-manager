@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { parseSegments, type TemplateVars } from '@/lib/utils/render-template'
 
 const PREVIEW_VARS: TemplateVars = {
-  date: '4月26日(日)',
+  date: '6/21 (Sun)',
   time: '9:00',
 }
 
@@ -30,7 +30,7 @@ export function TemplateForm({ type, defaultBody, hints, action }: TemplateFormP
         className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
       />
       <p className="text-xs text-zinc-500">
-        利用可能な変数:{' '}
+        Available variables:{' '}
         {hints.map((v) => (
           <code key={v} className="mr-2 rounded bg-zinc-100 px-1 py-0.5 font-mono">
             {v}
@@ -39,13 +39,13 @@ export function TemplateForm({ type, defaultBody, hints, action }: TemplateFormP
       </p>
 
       <div className="space-y-1">
-        <p className="text-xs text-zinc-500">プレビュー（サンプル値で表示）</p>
+        <p className="text-xs text-zinc-500">Preview (with sample values)</p>
         <div
-          aria-label="プレビュー"
+          aria-label="Preview"
           className="min-h-8 rounded border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm whitespace-pre-wrap"
         >
           {segments.length === 0 ? (
-            <span className="text-zinc-400">テンプレートを入力してください</span>
+            <span className="text-zinc-400">Enter a template above</span>
           ) : (
             segments.map((seg, i) =>
               seg.kind === 'text' ? (
@@ -66,7 +66,7 @@ export function TemplateForm({ type, defaultBody, hints, action }: TemplateFormP
         type="submit"
         className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
       >
-        保存する
+        Save
       </button>
     </form>
   )

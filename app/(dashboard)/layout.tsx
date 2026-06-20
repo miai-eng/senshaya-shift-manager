@@ -15,7 +15,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <span className="text-zinc-900">
             {manager.name}
             <span className="ml-2 text-xs text-zinc-700">
-              ({manager.role === 'manager' ? 'マネージャー' : 'アシスタント'})
+              ({manager.role === 'manager' ? 'Manager' : 'Assistant'})
             </span>
           </span>
           <form action={signOut}>
@@ -23,7 +23,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               type="submit"
               className="rounded border border-zinc-400 px-3 py-1 text-sm hover:bg-zinc-100"
             >
-              ログアウト
+              Sign out
             </button>
           </form>
         </div>

@@ -11,15 +11,15 @@ export default async function ForgotPasswordPage({
   if (sent) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">メール送信済み</h1>
+        <h1 className="text-2xl font-bold">Email sent</h1>
         <p className="text-sm text-zinc-800">
-          パスワード再設定用のリンクをメールで送信しました。受信トレイをご確認ください。
+          We sent a password reset link to your email. Please check your inbox.
         </p>
         <Link
           href="/login"
           className="block text-center text-sm text-zinc-800 underline hover:text-zinc-900"
         >
-          ログインに戻る
+          Back to sign in
         </Link>
       </div>
     )
@@ -27,15 +27,15 @@ export default async function ForgotPasswordPage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">パスワード再設定</h1>
+      <h1 className="text-2xl font-bold">Reset password</h1>
       <p className="text-sm text-zinc-800">
-        登録メールアドレスを入力してください。再設定用のリンクを送信します。
+        Enter your email address and we&apos;ll send you a reset link.
       </p>
 
       <form action={requestPasswordReset} className="space-y-4">
         <div className="space-y-1">
           <label htmlFor="email" className="block text-sm font-medium">
-            メールアドレス
+            Email
           </label>
           <input
             id="email"
@@ -51,13 +51,13 @@ export default async function ForgotPasswordPage({
           type="submit"
           className="w-full rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
         >
-          再設定リンクを送信
+          Send reset link
         </button>
       </form>
 
       <div className="text-center text-sm">
         <Link href="/login" className="text-zinc-800 underline hover:text-zinc-900">
-          ログインに戻る
+          Back to sign in
         </Link>
       </div>
     </div>

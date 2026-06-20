@@ -31,10 +31,10 @@ function parseFormData(formData: FormData): {
 
   const errors: EmployeeState['fieldErrors'] = {}
 
-  if (!name) errors.name = '氏名を入力してください'
+  if (!name) errors.name = 'Name is required'
 
   if (!phone) {
-    errors.phone = '電話番号を入力してください'
+    errors.phone = 'Phone number is required'
   } else {
     const phoneError = validatePhone(phone)
     if (phoneError) errors.phone = phoneError
@@ -44,7 +44,7 @@ function parseFormData(formData: FormData): {
   if (weeklyRaw) {
     const parsed = parseInt(weeklyRaw, 10)
     if (isNaN(parsed) || parsed <= 0) {
-      errors.weekly_hour_limit = '1以上の整数を入力してください'
+      errors.weekly_hour_limit = 'Enter a positive integer'
     } else {
       weekly_hour_limit = parsed
     }
@@ -78,7 +78,7 @@ export async function createEmployee(
     .select('id')
     .single()
 
-  if (error || !inserted) return { error: '保存に失敗しました。時間を置いて再度お試しください。' }
+  if (error || !inserted) return { error: 'Failed to save. Please try again later.' }
 
   const offDays = parseOffDays(formData)
   if (offDays.length > 0) {
@@ -109,7 +109,7 @@ export async function updateEmployee(
     .update({ ...data!, updated_at: new Date().toISOString() })
     .eq('id', id)
 
-  if (error) return { error: '保存に失敗しました。時間を置いて再度お試しください。' }
+  if (error) return { error: 'Failed to save. Please try again later.' }
 
   const offDays = parseOffDays(formData)
   const { data: existing } = await supabase
@@ -147,7 +147,7 @@ export async function archiveEmployee(formData: FormData): Promise<void> {
     .update({ is_active: false, updated_at: new Date().toISOString() })
     .eq('id', id)
 
-  if (error) throw new Error('アーカイブに失敗しました')
+  if (error) throw new Error('Failed to archive employee')
 
   revalidatePath('/employees')
 }
@@ -162,7 +162,7 @@ export async function restoreEmployee(formData: FormData): Promise<void> {
     .update({ is_active: true, updated_at: new Date().toISOString() })
     .eq('id', id)
 
-  if (error) throw new Error('復元に失敗しました')
+  if (error) throw new Error('Failed to restore employee')
 
   revalidatePath('/employees')
 }

@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
-import Link from 'next/link'
 
 const VANCOUVER_TZ = 'America/Vancouver'
+const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'] as const
 
 function todayInVancouver(): string {
   return new Intl.DateTimeFormat('en-CA', {
@@ -12,11 +12,13 @@ function todayInVancouver(): string {
   }).format(new Date())
 }
 
-function formatDate(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-').map(Number)
-  const d = new Date(year, month - 1, day)
-  const DOW = ['日', '月', '火', '水', '木', '金', '土']
-  return `${month}/${day} (${DOW[d.getDay()]})`
+function formatDateHeader(dateStr: string): { label: string; dow: number } {
+  const d = new Date(dateStr + 'T12:00:00Z')
+  const dow = d.getUTCDay()
+  return {
+    label: `${d.getUTCMonth() + 1}/${d.getUTCDate()}(${DAY_LABELS[dow]})`,
+    dow,
+  }
 }
 
 function createAnonClient() {
@@ -29,25 +31,36 @@ function createAnonClient() {
 
 type ShiftRow = {
   employee_id: string
+  shift_date: string
   start_time: string | null
   is_off: boolean
-  employees: { name: string } | null
 }
 
-export default async function PublicSchedulePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ date?: string }>
-}) {
-  const { date: dateParam } = await searchParams
-  const supabase = createAnonClient()
+type Employee = {
+  id: string
+  name: string
+}
 
-  const { data: locks } = await supabase
-    .from('shift_locks')
-    .select('shift_date')
-    .order('shift_date', { ascending: true })
+export default async function PublicSchedulePage() {
+  const supabase = createAnonClient()
+  const today = todayInVancouver()
+
+  // 過去7日〜未来の確定済み日付を取得
+  const sevenDaysAgo = new Date(today + 'T12:00:00Z')
+  sevenDaysAgo.setUTCDate(sevenDaysAgo.getUTCDate() - 7)
+  const rangeStart = sevenDaysAgo.toISOString().slice(0, 10)
+
+  const [{ data: locks }, { data: employeesRaw }] = await Promise.all([
+    supabase
+      .from('shift_locks')
+      .select('shift_date')
+      .gte('shift_date', rangeStart)
+      .order('shift_date', { ascending: true }),
+    supabase.from('employees').select('id, name').order('name'),
+  ])
 
   const lockedDates: string[] = (locks ?? []).map((l) => l.shift_date as string)
+  const employees: Employee[] = (employeesRaw ?? []) as Employee[]
 
   if (lockedDates.length === 0) {
     return (
@@ -57,80 +70,91 @@ export default async function PublicSchedulePage({
     )
   }
 
-  const today = todayInVancouver()
-  let selectedDate =
-    dateParam && lockedDates.includes(dateParam) ? dateParam : null
-  if (!selectedDate) {
-    selectedDate =
-      lockedDates.find((d) => d >= today) ?? lockedDates[lockedDates.length - 1]
-  }
-
   const { data: shiftsRaw } = await supabase
     .from('shifts')
-    .select('employee_id, start_time, is_off, employees(name)')
-    .eq('shift_date', selectedDate)
+    .select('employee_id, shift_date, start_time, is_off')
+    .in('shift_date', lockedDates)
 
-  const shifts = ((shiftsRaw ?? []) as unknown as ShiftRow[]).sort((a, b) => {
-    if (a.is_off && !b.is_off) return 1
-    if (!a.is_off && b.is_off) return -1
-    return (a.start_time ?? '').localeCompare(b.start_time ?? '')
-  })
+  const shifts = (shiftsRaw ?? []) as ShiftRow[]
 
-  const idx = lockedDates.indexOf(selectedDate)
-  const prevDate = idx > 0 ? lockedDates[idx - 1] : null
-  const nextDate = idx < lockedDates.length - 1 ? lockedDates[idx + 1] : null
+  // employee_id:shift_date → shift のマップ
+  const shiftMap = new Map<string, ShiftRow>()
+  for (const s of shifts) {
+    shiftMap.set(`${s.employee_id}:${s.shift_date}`, s)
+  }
+
+  // シフトが1件でもある従業員のみ表示
+  const activeEmployeeIds = new Set(shifts.map((s) => s.employee_id))
+  const visibleEmployees = employees.filter((e) => activeEmployeeIds.has(e.id))
 
   return (
-    <div className="min-h-screen bg-white px-4 py-8">
-      <div className="mx-auto max-w-sm space-y-6">
-        <h1 className="text-center text-xl font-bold">シフト確認</h1>
-
-        <div className="flex items-center justify-between">
-          {prevDate ? (
-            <Link
-              href={`/schedule?date=${prevDate}`}
-              className="rounded px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100"
-            >
-              ← {formatDate(prevDate)}
-            </Link>
-          ) : (
-            <span />
-          )}
-          <span className="text-lg font-semibold">{formatDate(selectedDate)}</span>
-          {nextDate ? (
-            <Link
-              href={`/schedule?date=${nextDate}`}
-              className="rounded px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100"
-            >
-              {formatDate(nextDate)} →
-            </Link>
-          ) : (
-            <span />
-          )}
-        </div>
-
-        {shifts.length === 0 ? (
-          <p className="text-center text-zinc-500">この日のシフトはありません。</p>
-        ) : (
-          <div className="divide-y divide-zinc-100 rounded-lg border border-zinc-200">
-            {shifts.map((s) => (
-              <div
-                key={s.employee_id}
-                className="flex items-center justify-between px-4 py-3"
-              >
-                <span className="font-medium">{s.employees?.name ?? '—'}</span>
-                <span className={s.is_off ? 'text-zinc-400' : 'font-medium text-zinc-800'}>
-                  {s.is_off ? '休み' : s.start_time ? s.start_time.slice(0, 5) + '〜' : '—'}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <p className="text-center text-xs text-zinc-400">
-          確定済みの日のみ表示されます
-        </p>
+    <div className="min-h-screen bg-white">
+      <div className="border-b border-zinc-200 px-4 py-4">
+        <h1 className="text-lg font-bold">シフト確認</h1>
       </div>
+
+      <div className="overflow-x-auto">
+        <table className="border-collapse text-sm">
+          <thead>
+            <tr>
+              <th className="sticky left-0 z-20 min-w-24 border-b border-r border-zinc-200 bg-white px-3 py-2 text-left text-xs font-medium text-zinc-500">
+                名前
+              </th>
+              {lockedDates.map((date) => {
+                const { label, dow } = formatDateHeader(date)
+                const isToday = date === today
+                const color =
+                  dow === 0 ? 'text-red-500' : dow === 6 ? 'text-blue-500' : 'text-zinc-700'
+                return (
+                  <th
+                    key={date}
+                    className={`min-w-20 border-b border-r border-zinc-200 px-2 py-2 text-center text-xs font-medium whitespace-nowrap ${isToday ? 'bg-zinc-50' : 'bg-white'}`}
+                  >
+                    <span className={color}>{label}</span>
+                    {isToday && (
+                      <span className="ml-1 rounded bg-zinc-800 px-1 py-0.5 text-xs text-white">
+                        今日
+                      </span>
+                    )}
+                  </th>
+                )
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {visibleEmployees.map((emp) => (
+              <tr key={emp.id}>
+                <td className="sticky left-0 z-10 border-b border-r border-zinc-200 bg-white px-3 py-2 font-medium text-zinc-900">
+                  {emp.name}
+                </td>
+                {lockedDates.map((date) => {
+                  const shift = shiftMap.get(`${emp.id}:${date}`) ?? null
+                  return (
+                    <td
+                      key={date}
+                      className="border-b border-r border-zinc-200 px-2 py-2 text-center"
+                    >
+                      {shift ? (
+                        shift.is_off ? (
+                          <span className="text-xs text-zinc-400">休み</span>
+                        ) : (
+                          <span className="text-xs font-medium text-zinc-800">
+                            {shift.start_time ? shift.start_time.slice(0, 5) : '—'}
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-xs text-zinc-300">—</span>
+                      )}
+                    </td>
+                  )
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="px-4 py-3 text-xs text-zinc-400">確定済みの日のみ表示されます</p>
     </div>
   )
 }

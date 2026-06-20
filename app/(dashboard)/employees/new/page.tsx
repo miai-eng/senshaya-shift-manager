@@ -10,9 +10,9 @@ export default async function NewEmployeePage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/employees" className="text-sm text-zinc-500 hover:text-zinc-700">
-          ← 従業員一覧
+          ← Employees
         </Link>
-        <h1 className="text-2xl font-bold">従業員を追加</h1>
+        <h1 className="text-2xl font-bold">Add Employee</h1>
       </div>
       <div className="max-w-lg">
         <EmployeeForm action={createEmployee} />

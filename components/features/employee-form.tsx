@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useActionState } from 'react'
 import type { EmployeeState } from '@/app/(dashboard)/employees/actions'
 
-const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
+const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 type Action = (prevState: EmployeeState, formData: FormData) => Promise<EmployeeState>
 
@@ -17,7 +17,6 @@ interface EmployeeFormProps {
     visa_type?: string | null
     weekly_hour_limit?: number | null
     notes?: string | null
-    is_manager?: boolean
   }
   defaultOffDays?: number[]
 }
@@ -29,7 +28,6 @@ export function EmployeeForm({
 }: EmployeeFormProps) {
   const [state, formAction] = useActionState(action, {})
   const [offDays, setOffDays] = useState(new Set(defaultOffDays))
-  const [isManager, setIsManager] = useState(defaultValues.is_manager ?? false)
 
   const [fields, setFields] = useState({
     name: defaultValues.name ?? '',
@@ -47,7 +45,6 @@ export function EmployeeForm({
   return (
     <form action={formAction} className="space-y-5">
       {defaultValues.id && <input type="hidden" name="id" value={defaultValues.id} />}
-      <input type="hidden" name="is_manager" value={isManager ? 'true' : 'false'} />
 
       {state.error && (
         <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -57,7 +54,7 @@ export function EmployeeForm({
 
       <div className="space-y-1">
         <label htmlFor="name" className="block text-sm font-medium">
-          氏名 <span className="text-red-500">*</span>
+          Name <span className="text-red-500">*</span>
         </label>
         <input
           id="name"
@@ -74,7 +71,7 @@ export function EmployeeForm({
 
       <div className="space-y-1">
         <label htmlFor="phone" className="block text-sm font-medium">
-          電話番号 <span className="text-red-500">*</span>
+          Phone <span className="text-red-500">*</span>
         </label>
         <input
           id="phone"
@@ -85,7 +82,7 @@ export function EmployeeForm({
           placeholder="+16041234567"
           className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
         />
-        <p className="text-xs text-zinc-500">+1 などから始まる11桁（ハイフン不要）</p>
+        <p className="text-xs text-zinc-500">E.164 format starting with +1 (11 digits, no hyphens)</p>
         {state.fieldErrors?.phone && (
           <p className="text-xs text-red-600">{state.fieldErrors.phone}</p>
         )}
@@ -93,7 +90,7 @@ export function EmployeeForm({
 
       <div className="space-y-1">
         <label htmlFor="visa_type" className="block text-sm font-medium">
-          ビザ種別
+          Visa type
         </label>
         <select
           id="visa_type"
@@ -102,7 +99,7 @@ export function EmployeeForm({
           onChange={update('visa_type')}
           className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
         >
-          <option value="">選択してください</option>
+          <option value="">Select</option>
           <option value="Working Holiday">Working Holiday</option>
           <option value="Study Permit">Study Permit</option>
           <option value="Work Permit">Work Permit</option>
@@ -113,7 +110,7 @@ export function EmployeeForm({
 
       <div className="space-y-1">
         <label htmlFor="weekly_hour_limit" className="block text-sm font-medium">
-          週間労働時間上限
+          Weekly hour limit
         </label>
         <input
           id="weekly_hour_limit"
@@ -131,7 +128,7 @@ export function EmployeeForm({
 
       <div className="space-y-1">
         <label htmlFor="notes" className="block text-sm font-medium">
-          備考
+          Notes
         </label>
         <textarea
           id="notes"
@@ -143,20 +140,8 @@ export function EmployeeForm({
         />
       </div>
 
-      <div className="space-y-1">
-        <label className="flex items-center gap-2 text-sm font-medium">
-          <input
-            type="checkbox"
-            checked={isManager}
-            onChange={(e) => setIsManager(e.target.checked)}
-            className="rounded border-zinc-400"
-          />
-          マネージャー職（シフト自動入力: 9:00）
-        </label>
-      </div>
-
       <div className="space-y-2">
-        <p className="text-sm font-medium">定期休み（曜日固定）</p>
+        <p className="text-sm font-medium">Fixed days off</p>
         <div className="flex flex-wrap gap-3">
           {DAY_LABELS.map((label, dow) => (
             <label key={dow} className="flex items-center gap-1.5 text-sm">
@@ -184,7 +169,7 @@ export function EmployeeForm({
         type="submit"
         className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
       >
-        保存する
+        Save
       </button>
     </form>
   )

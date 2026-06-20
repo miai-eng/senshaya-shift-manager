@@ -2,9 +2,9 @@ import Link from 'next/link'
 import { signIn } from './actions'
 
 const ERROR_MESSAGES: Record<string, string> = {
-  invalid_credentials: 'メールアドレスまたはパスワードが間違っています。',
-  not_a_manager: 'このアカウントには管理者権限がありません。',
-  unknown: 'ログインに失敗しました。時間を置いて再度お試しください。',
+  invalid_credentials: 'Invalid email or password.',
+  not_a_manager: 'This account does not have manager access.',
+  unknown: 'Sign in failed. Please try again later.',
 }
 
 export default async function LoginPage({
@@ -17,7 +17,7 @@ export default async function LoginPage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">ログイン</h1>
+      <h1 className="text-2xl font-bold">Sign in</h1>
 
       {errorMessage && (
         <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -28,7 +28,7 @@ export default async function LoginPage({
       <form action={signIn} className="space-y-4">
         <div className="space-y-1">
           <label htmlFor="email" className="block text-sm font-medium">
-            メールアドレス
+            Email
           </label>
           <input
             id="email"
@@ -42,7 +42,7 @@ export default async function LoginPage({
 
         <div className="space-y-1">
           <label htmlFor="password" className="block text-sm font-medium">
-            パスワード
+            Password
           </label>
           <input
             id="password"
@@ -58,13 +58,13 @@ export default async function LoginPage({
           type="submit"
           className="w-full rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
         >
-          ログイン
+          Sign in
         </button>
       </form>
 
       <div className="text-center text-sm">
         <Link href="/forgot-password" className="text-zinc-800 underline hover:text-zinc-900">
-          パスワードを忘れた場合
+          Forgot your password?
         </Link>
       </div>
     </div>

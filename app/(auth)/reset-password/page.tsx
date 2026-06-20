@@ -4,8 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { updatePassword } from './actions'
 
 const ERROR_MESSAGES: Record<string, string> = {
-  weak_password: 'パスワードは6文字以上で入力してください。',
-  unknown: 'パスワードの更新に失敗しました。もう一度お試しください。',
+  weak_password: 'Password must be at least 6 characters.',
+  unknown: 'Failed to update password. Please try again.',
 }
 
 export default async function ResetPasswordPage({
@@ -13,8 +13,6 @@ export default async function ResetPasswordPage({
 }: {
   searchParams: Promise<{ error?: string }>
 }) {
-  // /auth/confirm 経由で一時セッションが作成されている前提。
-  // セッションがなければ /login へ。
   const supabase = await createClient()
   const {
     data: { user },
@@ -28,8 +26,8 @@ export default async function ResetPasswordPage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">新しいパスワード</h1>
-      <p className="text-sm text-zinc-800">新しいパスワードを設定してください。</p>
+      <h1 className="text-2xl font-bold">New password</h1>
+      <p className="text-sm text-zinc-800">Set a new password for your account.</p>
 
       {errorMessage && (
         <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -40,7 +38,7 @@ export default async function ResetPasswordPage({
       <form action={updatePassword} className="space-y-4">
         <div className="space-y-1">
           <label htmlFor="password" className="block text-sm font-medium">
-            新しいパスワード（6文字以上）
+            New password (min. 6 characters)
           </label>
           <input
             id="password"
@@ -57,13 +55,13 @@ export default async function ResetPasswordPage({
           type="submit"
           className="w-full rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
         >
-          パスワードを更新
+          Update password
         </button>
       </form>
 
       <div className="text-center text-sm">
         <Link href="/login" className="text-zinc-800 underline hover:text-zinc-900">
-          ログインに戻る
+          Back to sign in
         </Link>
       </div>
     </div>

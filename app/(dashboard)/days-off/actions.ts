@@ -41,11 +41,11 @@ function parseDaysOffForm(formData: FormData): {
 
   const errors: DaysOffState['fieldErrors'] = {}
 
-  if (!employee_id) errors.employee_id = '従業員を選択してください'
-  if (!start_date) errors.start_date = '開始日を入力してください'
-  if (!end_date) errors.end_date = '終了日を入力してください'
+  if (!employee_id) errors.employee_id = 'Select an employee'
+  if (!start_date) errors.start_date = 'Start date is required'
+  if (!end_date) errors.end_date = 'End date is required'
   if (start_date && end_date && end_date < start_date) {
-    errors.end_date = '終了日は開始日以降の日付を入力してください'
+    errors.end_date = 'End date must be on or after start date'
   }
 
   if (Object.keys(errors).length > 0) return { errors }
@@ -68,12 +68,12 @@ export async function createDaysOff(
   const overlaps = await checkOverlap(supabase, data!.employee_id, data!.start_date, data!.end_date)
   if (overlaps) {
     return {
-      fieldErrors: { start_date: 'この期間はすでに登録されているリクエストオフと重複しています' },
+      fieldErrors: { start_date: 'This period overlaps with an existing time off record' },
     }
   }
 
   const { error } = await supabase.from('requested_days_off').insert(data!)
-  if (error) return { error: '保存に失敗しました。時間を置いて再度お試しください。' }
+  if (error) return { error: 'Failed to save. Please try again later.' }
 
   revalidatePath('/days-off')
   redirect('/days-off')
@@ -86,7 +86,7 @@ export async function updateDaysOff(
   await requireManager()
 
   const id = formData.get('id') as string
-  if (!id) return { error: 'IDが見つかりません' }
+  if (!id) return { error: 'Record ID not found' }
 
   const { data, errors } = parseDaysOffForm(formData)
   if (errors) return { fieldErrors: errors }
@@ -101,12 +101,12 @@ export async function updateDaysOff(
   )
   if (overlaps) {
     return {
-      fieldErrors: { start_date: 'この期間はすでに登録されているリクエストオフと重複しています' },
+      fieldErrors: { start_date: 'This period overlaps with an existing time off record' },
     }
   }
 
   const { error } = await supabase.from('requested_days_off').update(data!).eq('id', id)
-  if (error) return { error: '保存に失敗しました。時間を置いて再度お試しください。' }
+  if (error) return { error: 'Failed to save. Please try again later.' }
 
   revalidatePath('/days-off')
   redirect('/days-off')
@@ -119,7 +119,7 @@ export async function deleteDaysOff(formData: FormData): Promise<void> {
   const supabase = await createClient()
   const { error } = await supabase.from('requested_days_off').delete().eq('id', id)
 
-  if (error) throw new Error('削除に失敗しました')
+  if (error) throw new Error('Failed to delete')
 
   revalidatePath('/days-off')
 }

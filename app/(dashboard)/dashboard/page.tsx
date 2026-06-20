@@ -7,8 +7,8 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold">ダッシュボード</h1>
-        <p className="text-zinc-900">ようこそ、{manager.name} さん。</p>
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <p className="text-zinc-900">Welcome, {manager.name}.</p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -16,23 +16,23 @@ export default async function DashboardPage() {
           href="/shifts"
           className="col-span-full rounded bg-zinc-900 p-4 text-white hover:bg-zinc-800"
         >
-          <div className="font-semibold">シフト入力</div>
-          <div className="mt-1 text-sm text-zinc-400">翌日のシフトを入力・確定する</div>
+          <div className="font-semibold">Shifts</div>
+          <div className="mt-1 text-sm text-zinc-400">Enter and confirm daily shifts</div>
         </Link>
         <Link href="/employees" className="rounded border border-zinc-200 p-4 hover:bg-zinc-50">
-          <div className="font-semibold">従業員管理</div>
-          <div className="mt-1 text-sm text-zinc-500">従業員の追加・編集・アーカイブ</div>
+          <div className="font-semibold">Employees</div>
+          <div className="mt-1 text-sm text-zinc-500">Add, edit, and archive employees</div>
         </Link>
         <Link href="/days-off" className="rounded border border-zinc-200 p-4 hover:bg-zinc-50">
-          <div className="font-semibold">リクエストオフ管理</div>
-          <div className="mt-1 text-sm text-zinc-500">従業員のオフ期間を登録・管理する</div>
+          <div className="font-semibold">Time Off</div>
+          <div className="mt-1 text-sm text-zinc-500">Manage employee time off requests</div>
         </Link>
         <Link
           href="/settings/templates"
           className="rounded border border-zinc-200 p-4 hover:bg-zinc-50"
         >
-          <div className="font-semibold">テンプレート設定</div>
-          <div className="mt-1 text-sm text-zinc-500">シフト連絡の定型文を編集する</div>
+          <div className="font-semibold">Message Templates</div>
+          <div className="mt-1 text-sm text-zinc-500">Edit SMS message templates</div>
         </Link>
       </div>
     </div>
