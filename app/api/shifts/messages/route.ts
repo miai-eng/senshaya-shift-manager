@@ -33,7 +33,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       supabase
         .from('shifts')
         .select('id, start_time, is_off, employees(name, phone)')
-        .eq('shift_date', date),
+        .eq('shift_date', date)
+        .eq('is_off', false),
       supabase.from('message_templates').select('type, body'),
     ])
 
