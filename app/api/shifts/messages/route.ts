@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyShortcutToken } from '@/lib/auth/shortcut'
 import { renderTemplate } from '@/lib/utils/render-template'
 
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'date パラメータが必要です (YYYY-MM-DD)' }, { status: 400 })
   }
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const [{ data: shifts, error: shiftsError }, { data: templates, error: templatesError }] =
     await Promise.all([

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyShortcutToken } from '@/lib/auth/shortcut'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const { shift_id, message_body } = body as { shift_id: string; message_body: string }
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { error: updateError } = await supabase
     .from('shifts')
