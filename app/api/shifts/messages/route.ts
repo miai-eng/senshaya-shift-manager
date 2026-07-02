@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyShortcutToken } from '@/lib/auth/shortcut'
 import { renderTemplate } from '@/lib/utils/render-template'
 
-const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'] as const
+const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 
 function formatMessageDate(date: string): string {
   const d = new Date(date + 'T12:00:00Z')
