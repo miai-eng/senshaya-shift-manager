@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyShortcutToken } from '@/lib/auth/shortcut'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -20,15 +20,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     typeof (body as Record<string, unknown>).shift_id !== 'string' ||
     typeof (body as Record<string, unknown>).message_body !== 'string'
   ) {
-    return NextResponse.json(
-      { error: 'shift_id と message_body が必要です' },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: 'shift_id と message_body が必要です' }, { status: 400 })
   }
 
   const { shift_id, message_body } = body as { shift_id: string; message_body: string }
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { error: updateError } = await supabase
     .from('shifts')
@@ -39,9 +36,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'シフトステータスの更新に失敗しました' }, { status: 500 })
   }
 
-  const { error: logError } = await supabase
-    .from('message_logs')
-    .insert({ shift_id, message_body })
+  const { error: logError } = await supabase.from('message_logs').insert({ shift_id, message_body })
 
   if (logError) {
     return NextResponse.json({ error: '送信ログの記録に失敗しました' }, { status: 500 })

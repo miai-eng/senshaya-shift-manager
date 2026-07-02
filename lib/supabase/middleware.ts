@@ -8,6 +8,7 @@ const PUBLIC_PATHS = [
   '/test-connection',
   '/auth/confirm',
   '/schedule',
+  '/api/shifts/messages', // iOSショートカット用API（route側でBearerトークン検証）
 ]
 
 function isPublicPath(pathname: string): boolean {
