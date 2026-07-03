@@ -249,13 +249,21 @@ export function ShiftGrid({
                     <div className="flex flex-col items-center gap-1">
                       <span className={color}>{label}</span>
                       {isLocked && !isPast ? (
-                        <button
-                          onClick={() => handleUnlock(date)}
-                          disabled={isPending}
-                          className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs text-zinc-400 hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
-                        >
-                          🔒 Unlock
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => handleUnlock(date)}
+                            disabled={isPending}
+                            className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs text-zinc-400 hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
+                          >
+                            🔒 Unlock
+                          </button>
+                          <a
+                            href={`shortcuts://run-shortcut?name=${encodeURIComponent('シフトSMS送信')}&input=text&text=${date}`}
+                            className="rounded bg-emerald-600 px-1.5 py-0.5 text-xs text-white hover:bg-emerald-500"
+                          >
+                            📱 SMS
+                          </a>
+                        </div>
                       ) : isEditableDate && !isLocked ? (
                         <button
                           onClick={() => handleLock(date)}
