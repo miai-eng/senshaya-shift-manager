@@ -56,7 +56,7 @@ export default async function PublicSchedulePage() {
       .select('shift_date')
       .gte('shift_date', rangeStart)
       .order('shift_date', { ascending: true }),
-    supabase.from('employees').select('id, name').order('name'),
+    supabase.from('employees').select('id, name').order('display_order').order('name'),
   ])
 
   const lockedDates: string[] = (locks ?? []).map((l) => l.shift_date as string)

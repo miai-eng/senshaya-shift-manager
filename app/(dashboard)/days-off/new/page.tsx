@@ -12,7 +12,7 @@ export default async function NewDaysOffPage() {
     .from('employees')
     .select('id, name')
     .eq('is_active', true)
-    .order('name')
+    .order('display_order').order('name')
 
   return (
     <div className="space-y-6">
