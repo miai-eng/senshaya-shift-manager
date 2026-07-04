@@ -41,7 +41,7 @@ export default async function EmployeesPage({
     .select(
       'id, name, phone, visa_type, weekly_hour_limit, is_active, recurring_days_off(day_of_week)',
     )
-    .order('name')
+    .order('display_order').order('name')
 
   if (currentStatus === 'active') query = query.eq('is_active', true)
   else if (currentStatus === 'archived') query = query.eq('is_active', false)
