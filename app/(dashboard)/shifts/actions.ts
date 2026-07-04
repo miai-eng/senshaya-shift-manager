@@ -12,24 +12,14 @@ export async function upsertShift(
   await requireManager()
 
   const supabase = await createClient()
-  const row =
-    'isOff' in payload
-      ? {
-          employee_id: employeeId,
-          shift_date: shiftDate,
-          is_off: true,
-          start_time: null,
-          status: 'draft',
-          updated_at: new Date().toISOString(),
-        }
-      : {
-          employee_id: employeeId,
-          shift_date: shiftDate,
-          is_off: false,
-          start_time: payload.startTime,
-          status: 'draft',
-          updated_at: new Date().toISOString(),
-        }
+  const row = {
+    employee_id: employeeId,
+    shift_date: shiftDate,
+    is_off: 'isOff' in payload,
+    start_time: 'isOff' in payload ? null : payload.startTime,
+    status: 'draft',
+    updated_at: new Date().toISOString(),
+  }
 
   const { error } = await supabase
     .from('shifts')

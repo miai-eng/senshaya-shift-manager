@@ -17,7 +17,7 @@ export default async function EditDaysOffPage({ params }: { params: Promise<{ id
       .select('id, employee_id, start_date, end_date, reason')
       .eq('id', id)
       .single(),
-    supabase.from('employees').select('id, name').eq('is_active', true).order('name'),
+    supabase.from('employees').select('id, name').eq('is_active', true).order('display_order').order('name'),
   ])
 
   if (!daysOff) notFound()

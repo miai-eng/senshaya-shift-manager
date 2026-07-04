@@ -56,7 +56,7 @@ export default async function ShiftsPage({
       .from('employees')
       .select('id, name, notes, weekly_hour_limit, is_manager, recurring_days_off(day_of_week)')
       .eq('is_active', true)
-      .order('name'),
+      .order('display_order').order('name'),
     supabase
       .from('requested_days_off')
       .select('employee_id, start_date, end_date')
