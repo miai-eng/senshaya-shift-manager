@@ -27,6 +27,7 @@ type Shift = {
   employee_id: string
   shift_date: string
   start_time: string | null
+  note: string | null
   is_off: boolean
   status: string
 }
@@ -88,6 +89,8 @@ export function ShiftGrid({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [activeCell, setActiveCell] = useState<string | null>(null)
+  const [showNoteInput, setShowNoteInput] = useState(false)
+  const [noteInput, setNoteInput] = useState('')
 
   const [optimisticMap, applyOptimistic] = useOptimistic(
     toShiftMap(initialShifts),
@@ -150,6 +153,7 @@ export function ShiftGrid({
           employee_id: empId,
           shift_date: date,
           start_time: null,
+          note: null,
           is_off: true,
           status: 'draft',
         }
@@ -157,18 +161,83 @@ export function ShiftGrid({
         const result = await upsertShift(empId, date, { isOff: true })
         if (result.error) alert(result.error)
       } else {
+        // Keep any existing note when switching between preset start times.
+        const existing = optimisticMap[key] ?? null
+        const preservedNote = existing && !existing.is_off ? existing.note : null
         const optimistic: Shift = {
           id: '',
           employee_id: empId,
           shift_date: date,
           start_time: toDbTime(value),
+          note: preservedNote,
           is_off: false,
           status: 'draft',
         }
         applyOptimistic({ key, shift: optimistic })
-        const result = await upsertShift(empId, date, { startTime: toDbTime(value) })
+        const result = await upsertShift(empId, date, {
+          startTime: toDbTime(value),
+          note: preservedNote,
+        })
         if (result.error) alert(result.error)
       }
+      router.refresh()
+    })
+  }
+
+  async function handleSaveNote(empId: string, date: string) {
+    const t = noteInput
+    if (!/^\d{1,2}:\d{2}$/.test(t)) return
+
+    const key = `${empId}:${date}`
+    const existing = optimisticMap[key] ?? null
+    const existingStartTime =
+      existing && !existing.is_off && existing.start_time ? existing.start_time : null
+    setActiveCell(null)
+    setShowNoteInput(false)
+
+    startTransition(async () => {
+      if (existingStartTime) {
+        // A start time already exists: save the entered time as a note.
+        const optimistic: Shift = { ...existing!, note: toDbTime(t) }
+        applyOptimistic({ key, shift: optimistic })
+        const result = await upsertShift(empId, date, {
+          startTime: existingStartTime,
+          note: toDbTime(t),
+        })
+        if (result.error) alert(result.error)
+      } else {
+        // No start time yet: the entered time becomes the start time.
+        const optimistic: Shift = {
+          id: '',
+          employee_id: empId,
+          shift_date: date,
+          start_time: toDbTime(t),
+          note: null,
+          is_off: false,
+          status: 'draft',
+        }
+        applyOptimistic({ key, shift: optimistic })
+        const result = await upsertShift(empId, date, { startTime: toDbTime(t), note: null })
+        if (result.error) alert(result.error)
+      }
+      router.refresh()
+    })
+  }
+
+  async function handleDeleteNote(empId: string, date: string) {
+    const key = `${empId}:${date}`
+    const existing = optimisticMap[key] ?? null
+    const existingStartTime =
+      existing && !existing.is_off && existing.start_time ? existing.start_time : null
+    if (!existing || !existingStartTime) return
+
+    setActiveCell(null)
+    setShowNoteInput(false)
+
+    startTransition(async () => {
+      applyOptimistic({ key, shift: { ...existing, note: null } })
+      const result = await upsertShift(empId, date, { startTime: existingStartTime, note: null })
+      if (result.error) alert(result.error)
       router.refresh()
     })
   }
@@ -189,7 +258,7 @@ export function ShiftGrid({
   const activeEmpId = activeParts ? activeParts[0] : null
   const activeDate = activeParts ? activeParts.slice(1).join(':') : null
   const activeEmp = activeEmpId ? employees.find((e) => e.id === activeEmpId) : null
-  const activeShift = activeCell ? optimisticMap[activeCell] ?? null : null
+  const activeShift = activeCell ? (optimisticMap[activeCell] ?? null) : null
 
   return (
     <div className="space-y-3">
@@ -227,24 +296,20 @@ export function ShiftGrid({
         <table className="border-collapse text-sm">
           <thead>
             <tr>
-              <th className="sticky left-0 z-20 min-w-28 border-b border-r border-zinc-200 bg-white px-3 py-2 text-left text-xs font-medium text-zinc-500">
+              <th className="sticky left-0 z-20 min-w-28 border-r border-b border-zinc-200 bg-white px-3 py-2 text-left text-xs font-medium text-zinc-500">
                 Employee
               </th>
               {dates.map((date) => {
                 const { label, dow } = formatDateHeader(date)
                 const color =
-                  dow === 0
-                    ? 'text-red-500'
-                    : dow === 6
-                      ? 'text-blue-500'
-                      : 'text-zinc-700'
+                  dow === 0 ? 'text-red-500' : dow === 6 ? 'text-blue-500' : 'text-zinc-700'
                 const isLocked = lockedSet.has(date)
                 const isEditableDate = date === today || date === tomorrow
                 const isPast = date < today
                 return (
                   <th
                     key={date}
-                    className={`sticky top-0 z-10 min-w-24 border-b border-r border-zinc-200 px-2 py-2 text-center text-xs font-medium whitespace-nowrap ${isLocked ? 'bg-zinc-50' : 'bg-white'}`}
+                    className={`sticky top-0 z-10 min-w-24 border-r border-b border-zinc-200 px-2 py-2 text-center text-xs font-medium whitespace-nowrap ${isLocked ? 'bg-zinc-50' : 'bg-white'}`}
                   >
                     <div className="flex flex-col items-center gap-1">
                       <span className={color}>{label}</span>
@@ -282,7 +347,7 @@ export function ShiftGrid({
           <tbody>
             {employees.map((emp) => (
               <tr key={emp.id}>
-                <td className="sticky left-0 z-10 border-b border-r border-zinc-200 bg-white px-3 py-2">
+                <td className="sticky left-0 z-10 border-r border-b border-zinc-200 bg-white px-3 py-2">
                   <div className="font-medium text-zinc-900">{emp.name}</div>
                   {emp.weekly_hour_limit != null && (
                     <div className="text-xs text-zinc-400">{emp.weekly_hour_limit}h/wk</div>
@@ -299,31 +364,57 @@ export function ShiftGrid({
 
                   let bgClass = 'bg-white'
                   if (recurringOff) bgClass = 'bg-zinc-100'
-                  else if (requestedOff) bgClass = isEditable ? 'bg-blue-50 hover:bg-blue-100' : 'bg-blue-50'
+                  else if (requestedOff)
+                    bgClass = isEditable ? 'bg-blue-50 hover:bg-blue-100' : 'bg-blue-50'
                   else if (isEditable) bgClass = 'bg-white hover:bg-zinc-50'
 
                   return (
                     <td
                       key={date}
-                      className={`border-b border-r border-zinc-200 px-1 py-1 text-center ${bgClass} ${isActive ? 'ring-2 ring-inset ring-zinc-400' : ''}`}
+                      className={`border-r border-b border-zinc-200 px-1 py-1 text-center ${bgClass} ${isActive ? 'ring-2 ring-zinc-400 ring-inset' : ''}`}
                     >
                       <button
-                        onClick={() => isEditable && !recurringOff && setActiveCell(isActive ? null : key)}
+                        onClick={() => {
+                          if (!isEditable || recurringOff) return
+                          const next = isActive ? null : key
+                          setActiveCell(next)
+                          setShowNoteInput(false)
+                          setNoteInput(
+                            next && shift && !shift.is_off && shift.note
+                              ? shift.note.slice(0, 5)
+                              : '',
+                          )
+                        }}
                         disabled={!isEditable || recurringOff || isPending}
-                        className="flex h-8 w-full items-center justify-center rounded text-xs disabled:cursor-default"
+                        className="flex min-h-8 w-full flex-col items-center justify-center rounded text-xs disabled:cursor-default"
                       >
                         {shift ? (
                           shift.is_off ? (
-                            <span className={`font-medium ${isEditable ? 'text-red-500' : 'text-red-300'}`}>Off</span>
-                          ) : (
-                            <span className={`font-medium ${isEditable ? 'text-zinc-900' : 'text-zinc-400'}`}>
-                              {formatTime(shift.start_time!)}
+                            <span
+                              className={`font-medium ${isEditable ? 'text-red-500' : 'text-red-300'}`}
+                            >
+                              Off
                             </span>
+                          ) : (
+                            <>
+                              <span
+                                className={`font-medium ${isEditable ? 'text-zinc-900' : 'text-zinc-400'}`}
+                              >
+                                {formatTime(shift.start_time!)}
+                              </span>
+                              {shift.note && (
+                                <span
+                                  className={`font-normal ${isEditable ? 'text-zinc-500' : 'text-zinc-300'}`}
+                                >
+                                  {formatTime(shift.note)}
+                                </span>
+                              )}
+                            </>
                           )
                         ) : recurringOff ? (
                           <span className="text-zinc-300">—</span>
                         ) : requestedOff ? (
-                          <span className="text-blue-300 text-xs">T/O</span>
+                          <span className="text-xs text-blue-300">T/O</span>
                         ) : (
                           <span className="text-zinc-300">—</span>
                         )}
@@ -357,7 +448,7 @@ export function ShiftGrid({
             onClick={() => setActiveCell(null)}
             aria-hidden="true"
           />
-          <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-200 bg-white p-4 shadow-2xl">
+          <div className="fixed right-0 bottom-0 left-0 z-50 border-t border-zinc-200 bg-white p-4 shadow-2xl">
             <div className="mx-auto max-w-sm space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-zinc-900">
@@ -400,6 +491,16 @@ export function ShiftGrid({
                   )
                 })}
                 <button
+                  onClick={() => setShowNoteInput((v) => !v)}
+                  className={`rounded border py-2 text-sm font-medium transition-colors ${
+                    activeShift && !activeShift.is_off && activeShift.note
+                      ? 'border-zinc-900 bg-zinc-100'
+                      : 'border-zinc-300 hover:bg-zinc-50'
+                  }`}
+                >
+                  Note
+                </button>
+                <button
                   onClick={() => handleSelect(activeEmp.id, activeDate, 'off')}
                   className={`rounded border py-2 text-sm font-medium transition-colors ${
                     activeShift?.is_off
@@ -418,6 +519,40 @@ export function ShiftGrid({
                   </button>
                 )}
               </div>
+
+              {showNoteInput && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="time"
+                      value={noteInput}
+                      onChange={(e) => setNoteInput(e.target.value)}
+                      className="flex-1 rounded border border-zinc-300 px-2 py-2 text-sm"
+                    />
+                    <button
+                      onClick={() => handleSaveNote(activeEmp.id, activeDate)}
+                      disabled={!noteInput || isPending}
+                      className="rounded bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
+                    >
+                      Save
+                    </button>
+                    {activeShift && !activeShift.is_off && activeShift.note && (
+                      <button
+                        onClick={() => handleDeleteNote(activeEmp.id, activeDate)}
+                        disabled={isPending}
+                        className="rounded border border-red-300 px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-xs text-zinc-400">
+                    {activeShift && !activeShift.is_off && activeShift.start_time
+                      ? 'Shown below the start time (not included in SMS)'
+                      : 'Saved as the start time (included in SMS)'}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </>

@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache'
 export async function upsertShift(
   employeeId: string,
   shiftDate: string,
-  payload: { startTime: string } | { isOff: true },
+  payload: { startTime: string; note: string | null } | { isOff: true },
 ): Promise<{ error?: string }> {
   await requireManager()
 
@@ -17,6 +17,7 @@ export async function upsertShift(
     shift_date: shiftDate,
     is_off: 'isOff' in payload,
     start_time: 'isOff' in payload ? null : payload.startTime,
+    note: 'isOff' in payload ? null : payload.note,
     status: 'draft',
     updated_at: new Date().toISOString(),
   }

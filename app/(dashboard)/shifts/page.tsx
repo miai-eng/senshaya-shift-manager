@@ -51,28 +51,30 @@ export default async function ShiftsPage({
 
   const supabase = await createClient()
 
-  const [{ data: employees }, { data: requestedDaysOff }, { data: shifts }, { data: locks }] = await Promise.all([
-    supabase
-      .from('employees')
-      .select('id, name, notes, weekly_hour_limit, is_manager, recurring_days_off(day_of_week)')
-      .eq('is_active', true)
-      .order('display_order').order('name'),
-    supabase
-      .from('requested_days_off')
-      .select('employee_id, start_date, end_date')
-      .lte('start_date', endDate)
-      .gte('end_date', startDate),
-    supabase
-      .from('shifts')
-      .select('id, employee_id, shift_date, start_time, is_off, status')
-      .gte('shift_date', startDate)
-      .lte('shift_date', endDate),
-    supabase
-      .from('shift_locks')
-      .select('shift_date')
-      .gte('shift_date', startDate)
-      .lte('shift_date', endDate),
-  ])
+  const [{ data: employees }, { data: requestedDaysOff }, { data: shifts }, { data: locks }] =
+    await Promise.all([
+      supabase
+        .from('employees')
+        .select('id, name, notes, weekly_hour_limit, is_manager, recurring_days_off(day_of_week)')
+        .eq('is_active', true)
+        .order('display_order')
+        .order('name'),
+      supabase
+        .from('requested_days_off')
+        .select('employee_id, start_date, end_date')
+        .lte('start_date', endDate)
+        .gte('end_date', startDate),
+      supabase
+        .from('shifts')
+        .select('id, employee_id, shift_date, start_time, is_off, status, note')
+        .gte('shift_date', startDate)
+        .lte('shift_date', endDate),
+      supabase
+        .from('shift_locks')
+        .select('shift_date')
+        .gte('shift_date', startDate)
+        .lte('shift_date', endDate),
+    ])
 
   return (
     <div className="space-y-4">
