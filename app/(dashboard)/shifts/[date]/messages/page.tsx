@@ -21,6 +21,7 @@ type EmployeeInfo = { name: string; is_manager: boolean }
 
 type ShiftWithEmployee = {
   id: string
+  employee_id: string
   start_time: string | null
   is_off: boolean
   employees: EmployeeInfo | EmployeeInfo[] | null
@@ -38,18 +39,38 @@ export default async function MessagesPreviewPage({
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) notFound()
 
   const supabase = await createClient()
+  const dayOfWeek = new Date(date + 'T12:00:00Z').getUTCDay()
 
-  const [{ data: lock }, { data: shifts }, { data: templates }] = await Promise.all([
+  const [
+    { data: lock },
+    { data: shifts },
+    { data: templates },
+    { data: requestedOff },
+    { data: recurringOff },
+  ] = await Promise.all([
     supabase.from('shift_locks').select('shift_date').eq('shift_date', date).single(),
     supabase
       .from('shifts')
-      .select('id, start_time, is_off, employees(name, is_manager)')
+      .select('id, employee_id, start_time, is_off, employees(name, is_manager)')
       .eq('shift_date', date)
       .order('start_time', { ascending: true, nullsFirst: false }),
     supabase.from('message_templates').select('type, body'),
+    supabase
+      .from('requested_days_off')
+      .select('employee_id')
+      .lte('start_date', date)
+      .gte('end_date', date),
+    supabase.from('recurring_days_off').select('employee_id').eq('day_of_week', dayOfWeek),
   ])
 
   if (!lock) notFound()
+
+  // 本人が申請済みのオフ（リクエストオフ・定期オフ）はSMS生成APIでも除外されるため、
+  // プレビューにも表示しない（生成APIのフィルタと同一のロジック）
+  const knownOffEmployeeIds = new Set([
+    ...(requestedOff ?? []).map((r) => r.employee_id as string),
+    ...(recurringOff ?? []).map((r) => r.employee_id as string),
+  ])
 
   const attendTemplate = templates?.find((t) => t.type === 'attend')?.body ?? ''
   const offTemplate = templates?.find((t) => t.type === 'off')?.body ?? ''
@@ -59,6 +80,7 @@ export default async function MessagesPreviewPage({
     .map((shift: ShiftWithEmployee) => {
       const emp = Array.isArray(shift.employees) ? shift.employees[0] : shift.employees
       if (!emp) return null
+      if (shift.is_off && knownOffEmployeeIds.has(shift.employee_id)) return null
       // マネージャーにはSMSを送らないため、プレビューにも表示しない
       if (emp.is_manager) return null
 
@@ -87,7 +109,7 @@ export default async function MessagesPreviewPage({
       </div>
 
       {ordered.length === 0 ? (
-        <p className="text-sm text-zinc-500">No shifts recorded for this date.</p>
+        <p className="text-sm text-zinc-500">No messages to send.</p>
       ) : (
         <>
           <p className="text-sm text-zinc-500">{ordered.length} messages to send</p>
