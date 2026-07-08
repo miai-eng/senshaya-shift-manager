@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
-// ショートカットAPI専用の特権クライアント。
-// RLSをバイパスするため、SHORTCUT_API_TOKEN検証済みのルートでのみ使用すること。
+// RLSをバイパスする特権クライアント。使用箇所は以下に限定すること:
+// 1. SHORTCUT_API_TOKEN 検証済みのAPIルート
+// 2. 公開スケジュールページ (サーバーコンポーネント内・読み取り専用・確定日の範囲に限定)
 export function createAdminClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
