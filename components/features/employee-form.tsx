@@ -17,6 +17,7 @@ interface EmployeeFormProps {
     visa_type?: string | null
     weekly_hour_limit?: number | null
     notes?: string | null
+    is_manager?: boolean
   }
   defaultOffDays?: number[]
 }
@@ -28,6 +29,7 @@ export function EmployeeForm({
 }: EmployeeFormProps) {
   const [state, formAction] = useActionState(action, {})
   const [offDays, setOffDays] = useState(new Set(defaultOffDays))
+  const [isManager, setIsManager] = useState(defaultValues.is_manager ?? false)
 
   const [fields, setFields] = useState({
     name: defaultValues.name ?? '',
@@ -82,7 +84,9 @@ export function EmployeeForm({
           placeholder="+16041234567"
           className="w-full rounded border border-zinc-400 px-3 py-2 text-sm focus:border-zinc-700 focus:outline-none"
         />
-        <p className="text-xs text-zinc-500">E.164 format starting with +1 (11 digits, no hyphens)</p>
+        <p className="text-xs text-zinc-500">
+          E.164 format starting with +1 (11 digits, no hyphens)
+        </p>
         {state.fieldErrors?.phone && (
           <p className="text-xs text-red-600">{state.fieldErrors.phone}</p>
         )}
@@ -163,6 +167,23 @@ export function EmployeeForm({
             </label>
           ))}
         </div>
+      </div>
+
+      <div className="space-y-1">
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            name="is_manager"
+            value="true"
+            checked={isManager}
+            onChange={(e) => setIsManager(e.target.checked)}
+            className="h-4 w-4 rounded border-zinc-400"
+          />
+          Manager
+        </label>
+        <p className="text-xs text-zinc-500">
+          Auto-filled with a 9:00 shift on confirm (unless off) and excluded from SMS
+        </p>
       </div>
 
       <button

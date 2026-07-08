@@ -37,7 +37,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   ] = await Promise.all([
     supabase
       .from('shifts')
-      .select('id, employee_id, start_time, is_off, employees(name, phone)')
+      .select('id, employee_id, start_time, is_off, employees(name, phone, is_manager)')
       .eq('shift_date', date),
     supabase.from('message_templates').select('type, body'),
     supabase
@@ -67,6 +67,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     .map((shift) => {
       const employee = Array.isArray(shift.employees) ? shift.employees[0] : shift.employees
       if (!employee) return null
+      // マネージャーにはSMSを送らない（デフォルト9:00・手動入力・Offいずれも対象外）
+      if (employee.is_manager) return null
 
       const body = shift.is_off
         ? renderTemplate(offTemplate, { date: dateLabel })

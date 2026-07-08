@@ -415,6 +415,8 @@ export function ShiftGrid({
                           <span className="text-zinc-300">—</span>
                         ) : requestedOff ? (
                           <span className="text-xs text-blue-300">T/O</span>
+                        ) : emp.is_manager && !isLocked ? (
+                          <span className="font-medium text-zinc-300">9:00</span>
                         ) : (
                           <span className="text-zinc-300">—</span>
                         )}
@@ -437,6 +439,10 @@ export function ShiftGrid({
         <span className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded border border-blue-100 bg-blue-50" />
           Time off requested
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="font-medium text-zinc-300">9:00</span>
+          Manager default (auto-filled on confirm)
         </span>
       </div>
 

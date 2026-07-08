@@ -17,11 +17,13 @@ function formatTime(t: string): string {
   return `${parseInt(h, 10)}:${m}`
 }
 
+type EmployeeInfo = { name: string; is_manager: boolean }
+
 type ShiftWithEmployee = {
   id: string
   start_time: string | null
   is_off: boolean
-  employees: { name: string } | { name: string }[] | null
+  employees: EmployeeInfo | EmployeeInfo[] | null
 }
 
 export default async function MessagesPreviewPage({
@@ -41,7 +43,7 @@ export default async function MessagesPreviewPage({
     supabase.from('shift_locks').select('shift_date').eq('shift_date', date).single(),
     supabase
       .from('shifts')
-      .select('id, start_time, is_off, employees(name)')
+      .select('id, start_time, is_off, employees(name, is_manager)')
       .eq('shift_date', date)
       .order('start_time', { ascending: true, nullsFirst: false }),
     supabase.from('message_templates').select('type, body'),
@@ -57,6 +59,8 @@ export default async function MessagesPreviewPage({
     .map((shift: ShiftWithEmployee) => {
       const emp = Array.isArray(shift.employees) ? shift.employees[0] : shift.employees
       if (!emp) return null
+      // マネージャーにはSMSを送らないため、プレビューにも表示しない
+      if (emp.is_manager) return null
 
       const body = shift.is_off
         ? renderTemplate(offTemplate, { date: dateLabel })
@@ -92,7 +96,7 @@ export default async function MessagesPreviewPage({
             {ordered.map((m, i) => (
               <div key={i} className="rounded border border-zinc-200 p-4">
                 <div className="mb-1.5 text-sm font-semibold text-zinc-900">{m.name}</div>
-                <div className="whitespace-pre-wrap text-sm text-zinc-700">{m.body}</div>
+                <div className="text-sm whitespace-pre-wrap text-zinc-700">{m.body}</div>
               </div>
             ))}
           </div>
