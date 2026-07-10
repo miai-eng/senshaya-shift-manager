@@ -1,33 +1,33 @@
-## 概要
+## Summary
 
-<!-- このPRで何を変更したか、1〜3行で説明してください -->
+<!-- Describe what this PR changes in 1–3 lines -->
 
-Closes #<!-- issue番号 -->
+Closes #<!-- issue number -->
 
-## 変更内容
+## Changes
 
-<!-- 主な変更点を箇条書きで -->
+<!-- Bullet points of the main changes -->
 
 -
 -
 
-## 動作確認手順
+## How to Verify
 
-<!-- レビュアーがローカルで確認するための手順 -->
+<!-- Steps for the reviewer to verify locally -->
 
 1.
 2.
 
-## チェックリスト
+## Checklist
 
-- [ ] `npm run lint` がパスする
-- [ ] `npm run build` がパスする
-- [ ] `npm run format:check` がパスする
-- [ ] 新しい環境変数を追加した場合、`.env.example` も更新した
-- [ ] DBスキーマを変更した場合、`supabase/migrations/` に新しいマイグレーションを追加した
-- [ ] 既存マイグレーションは編集していない
-- [ ] 個人情報（電話番号・本名など）をログ・テストデータに含めていない
+- [ ] `npm run lint` passes
+- [ ] `npm run build` passes
+- [ ] `npm run format:check` passes
+- [ ] If new environment variables were added, `.env.example` is updated
+- [ ] If the DB schema changed, a new migration was added under `supabase/migrations/`
+- [ ] No existing migrations were edited
+- [ ] No personal information (phone numbers, real names, etc.) in logs or test data
 
-## スクリーンショット / 補足
+## Screenshots / Notes
 
-<!-- UI変更がある場合はスクリーンショットを添付。その他補足があれば記載 -->
+<!-- Attach screenshots for UI changes. Add any other notes here -->

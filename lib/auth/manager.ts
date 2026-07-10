@@ -9,11 +9,11 @@ export type Manager = {
 }
 
 /**
- * 認証済みかつ public.managers に行があるユーザー（マネージャー）を返す。
- * - 未ログイン: /login へリダイレクト
- * - ログイン済みだが managers に行なし: signOut して /login?error=not_a_manager へ
+ * Returns the authenticated user who has a row in public.managers (a manager).
+ * - Not logged in: redirect to /login
+ * - Logged in but no row in managers: signOut, then redirect to /login?error=not_a_manager
  *
- * Server Components / Server Actions / Route Handlers から呼ぶ。
+ * Call from Server Components / Server Actions / Route Handlers.
  */
 export async function requireManager(): Promise<Manager> {
   const supabase = await createClient()

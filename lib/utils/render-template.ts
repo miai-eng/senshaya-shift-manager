@@ -31,10 +31,10 @@ export function parseSegments(template: string): Segment[] {
 }
 
 /**
- * テンプレート文字列を変数で置換する。
- * - 未定義変数（vars に無い、または値が null/undefined）は原文のまま残す。
- * - \{ \} \\ のエスケープを処理する。
- * 仕様: docs/template-spec.md
+ * Substitutes variables into a template string.
+ * - Undefined variables (absent from vars, or with null/undefined values) are left as-is.
+ * - Handles the \{ \} \\ escapes.
+ * Spec: docs/template-spec.md
  */
 export function renderTemplate(template: string, vars: TemplateVars): string {
   return template.replace(

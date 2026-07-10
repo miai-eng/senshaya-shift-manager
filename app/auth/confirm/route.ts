@@ -3,9 +3,9 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
 /**
- * Supabase メールリンク (パスワードリセット等) のコールバック。
- * token_hash と type を verifyOtp に渡してセッションを確立し、next で指定された
- * 経路にリダイレクトする。
+ * Callback for Supabase email links (password reset, etc.).
+ * Passes token_hash and type to verifyOtp to establish a session,
+ * then redirects to the path specified by next.
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(request.url)

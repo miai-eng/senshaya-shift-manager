@@ -8,7 +8,7 @@ const PUBLIC_PATHS = [
   '/test-connection',
   '/auth/confirm',
   '/schedule',
-  '/api/shifts/messages', // iOSショートカット用API（route側でBearerトークン検証）
+  '/api/shifts/messages', // API for the iOS Shortcut (Bearer token verified in the route)
 ]
 
 function isPublicPath(pathname: string): boolean {
@@ -37,8 +37,8 @@ export async function updateSession(request: NextRequest) {
     },
   )
 
-  // 重要: createServerClient と getUser() の間にコードを挟まない (Supabase 推奨)。
-  // getUser() がセッションをリフレッシュし、Set-Cookie が response に乗る。
+  // Important: do not put code between createServerClient and getUser() (Supabase recommendation).
+  // getUser() refreshes the session and puts Set-Cookie on the response.
   const {
     data: { user },
   } = await supabase.auth.getUser()

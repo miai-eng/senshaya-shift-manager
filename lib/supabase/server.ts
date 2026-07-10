@@ -18,7 +18,7 @@ export async function createClient() {
               cookieStore.set(name, value, options),
             )
           } catch {
-            // Server Componentから呼ばれた場合は無視（middlewareでセッション更新する想定）
+            // Ignore when called from a Server Component (middleware handles session refresh)
           }
         },
       },

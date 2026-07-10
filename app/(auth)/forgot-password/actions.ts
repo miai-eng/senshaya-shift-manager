@@ -12,7 +12,7 @@ export async function requestPasswordReset(formData: FormData): Promise<void> {
   const supabase = await createClient()
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
-  // エラーが起きてもユーザーには成功扱いを返す（メール存在の有無を漏らさない）。
+  // Report success to the user even on error (avoid leaking whether the email exists).
   await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${siteUrl}/auth/confirm?next=/reset-password`,
   })

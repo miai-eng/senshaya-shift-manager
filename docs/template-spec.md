@@ -1,153 +1,155 @@
-# メッセージテンプレート仕様
+# Message Template Specification
 
-> Issue: [#11 メッセージテンプレート機能](https://github.com/Tomoya300/senshaya-shiftmanager/issues/11)
-> Stage 1 成果物 — Phase 1 (MVP)
+> Issue: [#11 Message template feature](https://github.com/Tomoya300/senshaya-shiftmanager/issues/11)
+> Stage 1 deliverable — Phase 1 (MVP)
 
-## 1. 概要
+> Note: format examples in this document (e.g. `4月26日(日)`) reflect the original Japanese-language templates this spec was written against. The substitution engine itself is language-agnostic. Day-of-week labels were later switched to English in PR #41.
 
-シフト連絡で使う定型文テンプレートを管理する機能の、プレースホルダーおよび変数置換に関する仕様を定める。
+## 1. Overview
 
-マネージャーが管理画面でテンプレートを編集し、シフト送信時に変数が実際の値に置換されてメッセージとして送信される。
+Defines the placeholder and variable-substitution specification for the feature that manages the message templates used for shift notifications.
 
-## 2. プレースホルダー記法
+Managers edit templates on the settings screen; when shifts are sent, variables are replaced with actual values to produce the message.
 
-**単一波括弧** `{変数名}` を採用する。
+## 2. Placeholder Syntax
 
-| 記法   | 例                                  |
-| ------ | ----------------------------------- |
-| 通常   | `明日 {date} は {time} からです`    |
-| 置換後 | `明日 4月26日(日) は 9:00 からです` |
+**Single curly braces** `{variable_name}` are used.
 
-### 命名ルール
+| Form     | Example                             |
+| -------- | ----------------------------------- |
+| Template | `明日 {date} は {time} からです`    |
+| Rendered | `明日 4月26日(日) は 9:00 からです` |
 
-- 変数名は **小文字英字とアンダースコアのみ** 使用可能（正規表現: `[a-z][a-z0-9_]*`）
-- 大文字や日本語、ハイフンは使用しない
-- 例: `date` `time` `end_time` `name`（OK） / `Date` `日付` `end-time`（NG）
+### Naming Rules
 
-## 3. 利用可能な変数（MVP）
+- Variable names may use **lowercase letters and underscores only** (regex: `[a-z][a-z0-9_]*`)
+- No uppercase, non-ASCII characters, or hyphens
+- Examples: `date` `time` `end_time` `name` (OK) / `Date` `日付` `end-time` (NG)
 
-| 変数名   | 説明             | 出力例        | データソース      |
-| -------- | ---------------- | ------------- | ----------------- |
-| `{date}` | シフトの日付     | `4月26日(日)` | shifts.date       |
-| `{time}` | シフトの開始時刻 | `9:00`        | shifts.start_time |
+## 3. Available Variables (MVP)
 
-### 今後の拡張候補（Stage 1 では実装しない）
+| Variable | Description      | Example output | Data source       |
+| -------- | ---------------- | -------------- | ----------------- |
+| `{date}` | Shift date       | `4月26日(日)`  | shifts.date       |
+| `{time}` | Shift start time | `9:00`         | shifts.start_time |
 
-- `{end_time}` — シフト終了時刻
-- `{name}` — 従業員氏名
-- `{date_short}` — `4/26` 形式の短縮日付
-- `{shop_name}` — 店舗名
+### Future candidates (not implemented in Stage 1)
 
-## 4. フォーマット
+- `{end_time}` — shift end time
+- `{name}` — employee name
+- `{date_short}` — short date form like `4/26`
+- `{shop_name}` — store name
 
-**固定フォーマット**を採用する。フォーマット指定子（`{date:M月D日}` のような構文）はサポートしない。
+## 4. Formatting
 
-| 変数     | 固定フォーマット                    | 例             |
-| -------- | ----------------------------------- | -------------- |
-| `{date}` | `M月D日(曜)`                        | `4月26日(日)`  |
-| `{time}` | `H:mm` （24時間表記、ゼロ埋めなし） | `9:00` `18:30` |
+**Fixed formats** are used. Format specifiers (syntax like `{date:M月D日}`) are not supported.
 
-> 別のフォーマットが必要になった場合は、新しい変数名を追加する方針（例: `{date_short}` = `4/26`）。
+| Variable | Fixed format                      | Example        |
+| -------- | --------------------------------- | -------------- |
+| `{date}` | `M月D日(曜)`                      | `4月26日(日)`  |
+| `{time}` | `H:mm` (24-hour, no zero padding) | `9:00` `18:30` |
 
-### タイムゾーン
+> If a different format is ever needed, the policy is to add a new variable name (e.g. `{date_short}` = `4/26`).
 
-すべての日時は **JST (Asia/Tokyo)** で出力する。
+### Timezone
 
-## 5. エスケープ仕様
+All dates and times are rendered in **JST (Asia/Tokyo)**.
 
-**バックスラッシュエスケープ** を採用する。
+## 5. Escaping
 
-| 入力       | 出力                              |
-| ---------- | --------------------------------- |
-| `\{date\}` | `{date}` （置換されずそのまま）   |
-| `\\`       | `\`                               |
-| `\n`       | `\n` （特別扱いしない、リテラル） |
+**Backslash escaping** is used.
 
-### 改行
+| Input      | Output                                 |
+| ---------- | -------------------------------------- |
+| `\{date\}` | `{date}` (left as-is, not substituted) |
+| `\\`       | `\`                                    |
+| `\n`       | `\n` (no special handling; literal)    |
 
-テンプレート本文中の改行（LF）はそのまま出力に反映する。エスケープシーケンスとしての `\n` は処理しない。
+### Line Breaks
 
-## 6. 未定義変数の扱い
+Line breaks (LF) inside the template body are passed through to the output. `\n` is not processed as an escape sequence.
 
-**そのまま残す**。
+## 6. Undefined Variables
 
-| テンプレート                  | 結果                          |
+**Left as-is.**
+
+| Template                      | Result                        |
 | ----------------------------- | ----------------------------- |
 | `今日は {undefined_var} です` | `今日は {undefined_var} です` |
 
-理由: データ欠損や typo に気付きやすく、空文字置換よりも安全。
+Rationale: makes missing data and typos easy to notice; safer than substituting an empty string.
 
-> プレビュー画面（Stage 5）では未定義変数を**警告色でハイライト**して、マネージャーに気付かせる UI にする。
+> The preview screen (Stage 5) highlights undefined variables in a **warning color** so the manager notices them.
 
-## 7. データ欠損時の扱い
+## 7. Missing Data
 
-定義済み変数だが値が `null` / `undefined` の場合：
+For a defined variable whose value is `null` / `undefined`:
 
-| ケース                           | 結果                                          |
-| -------------------------------- | --------------------------------------------- |
-| `{time}` だが start_time が NULL | `{time}` （未定義変数と同じく原文のまま残す） |
+| Case                            | Result                                               |
+| ------------------------------- | ---------------------------------------------------- |
+| `{time}` but start_time is NULL | `{time}` (left as-is, same as an undefined variable) |
 
-理由: 「データはあるが空」と「typo で未定義」を出力上区別する必要がない。両方とも「置換できなかった」として可視化する。
+Rationale: there is no need to distinguish "data exists but is empty" from "undefined due to a typo" in the output. Both are surfaced as "could not be substituted."
 
-## 8. サンプルテンプレート
+## 8. Sample Templates
 
-issue で例示されている2種類を、初期 seed として用意する。
+The two examples from the issue are provided as the initial seed.
 
-### 出勤時テンプレート（type: `attend`）
+### Attendance template (type: `attend`)
 
 ```
 明日 {date} は {time} からです
 ```
 
-置換後: `明日 4月26日(日) は 9:00 からです`
+Rendered: `明日 4月26日(日) は 9:00 からです`
 
-### 休みテンプレート（type: `off`）
+### Day-off template (type: `off`)
 
 ```
 明日 {date} はお休みです
 ```
 
-置換後: `明日 4月26日(日) はお休みです`
+Rendered: `明日 4月26日(日) はお休みです`
 
-## 9. 関数シグネチャ（Stage 4 で実装）
+## 9. Function Signature (implemented in Stage 4)
 
 ```ts
 type TemplateVars = {
   date?: string
   time?: string
-  // 拡張時はここに追加
+  // add here when extending
 }
 
 /**
- * テンプレート文字列を変数で置換する。
- * - 未定義変数（vars に無い、または値が null/undefined）は原文のまま残す。
- * - \{ \} \\ のエスケープを処理する。
- * @returns 置換後の文字列
+ * Substitutes variables into a template string.
+ * - Undefined variables (absent from vars, or with null/undefined values) are left as-is.
+ * - Handles the \{ \} \\ escapes.
+ * @returns the rendered string
  */
 function renderTemplate(template: string, vars: TemplateVars): string
 ```
 
-## 10. 決定事項サマリ
+## 10. Decision Summary
 
-| 項目             | 決定内容                          |
-| ---------------- | --------------------------------- |
-| 記法             | `{var}` 単一波括弧                |
-| 変数名           | 小文字英字 + アンダースコア       |
-| MVP 変数         | `{date}` `{time}`                 |
-| 日付フォーマット | 固定 (`M月D日(曜)`)               |
-| 時刻フォーマット | 固定 (`H:mm`)                     |
-| タイムゾーン     | JST                               |
-| エスケープ       | バックスラッシュ (`\{` `\}` `\\`) |
-| 未定義変数       | 原文のまま残す                    |
-| データ欠損       | 原文のまま残す                    |
+| Item           | Decision                        |
+| -------------- | ------------------------------- |
+| Syntax         | `{var}` single curly braces     |
+| Variable names | lowercase letters + underscores |
+| MVP variables  | `{date}` `{time}`               |
+| Date format    | fixed (`M月D日(曜)`)            |
+| Time format    | fixed (`H:mm`)                  |
+| Timezone       | JST                             |
+| Escaping       | backslash (`\{` `\}` `\\`)      |
+| Undefined vars | left as-is                      |
+| Missing data   | left as-is                      |
 
 ---
 
-**Stage 1 完了条件チェック**
+**Stage 1 completion checklist**
 
-- [x] プレースホルダー記法を決定
-- [x] MVP 変数一覧を定義
-- [x] フォーマット仕様を決定
-- [x] エスケープ仕様を決定
-- [x] 未定義変数の扱いを決定
-- [x] サンプルテンプレートを定義
+- [x] Placeholder syntax decided
+- [x] MVP variable list defined
+- [x] Format specification decided
+- [x] Escape specification decided
+- [x] Undefined-variable handling decided
+- [x] Sample templates defined

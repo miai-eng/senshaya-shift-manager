@@ -20,7 +20,7 @@ export async function signIn(formData: FormData): Promise<void> {
     redirect('/login?error=invalid_credentials')
   }
 
-  // managers テーブルに行がない（= 管理者ではない）場合はサインアウトしてリダイレクト
+  // If there is no row in the managers table (= not a manager), sign out and redirect
   const { data: manager } = await supabase
     .from('managers')
     .select('id')

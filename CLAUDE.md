@@ -8,205 +8,205 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # CLAUDE.md
 
-このファイルはClaude Codeがこのプロジェクトで作業する際のガイドラインです.
+This file provides guidelines for Claude Code when working in this project.
 
-## プロジェクト概要
+## Project Overview
 
-カナダの洗車店向けのシフト連絡自動化ツール。マネージャーが翌日のシフトを入力し、各従業員に個別のSMSテキストメッセージを送信する作業を効率化する。
+A shift notification automation tool for a car wash in Canada. It streamlines the manager's daily task of entering the next day's shifts and sending an individual SMS text message to each employee.
 
-### 解決する課題
+### Problem Being Solved
 
-- マネージャーが従業員15〜20名に対して、毎日個別のテキストメッセージでシフトを連絡している
-- 従業員ごとに異なるシフト時間(例:9時、10時、11時、13時など)
-- 翌日のシフトはその日の終業後に決定される(週次・月次の一括作成は不可)
+- The manager texts 15–20 employees individually every day to communicate their shifts
+- Each employee has a different shift start time (e.g. 9:00, 10:00, 11:00, 13:00)
+- The next day's shifts are decided after close of business that day (weekly/monthly batch scheduling is not possible)
 
-### 主要な利用者
+### Primary Users
 
-- 店舗マネージャー1名
-- アシスタントマネージャー1名(マネージャー休日時に代行管理)
+- 1 store manager
+- 1 assistant manager (covers scheduling when the manager is off)
 
-### 重要な設計方針
+### Key Design Principles
 
-- **ランニングコスト$0**を維持する。有料サービスは使わない。
-- SMSはマネージャー個人の通信プランから送信する(SMS APIは使わない)
-- 既存のホワイトボード運用を完全には置き換えず、共存できる形で導入する
-- マネージャー2名のみが利用するため、複雑な権限管理は不要
+- Maintain **$0 running cost**. No paid services.
+- SMS is sent from the manager's personal phone plan (no SMS API)
+- The tool coexists with the existing whiteboard workflow rather than fully replacing it
+- Only 2 managers use the app, so complex permission management is unnecessary
 
-## 技術スタック
+## Tech Stack
 
-- **フロントエンド**: Next.js 15 (App Router) + React + TypeScript
-- **スタイリング**: Tailwind CSS
-- **バックエンド/DB**: Supabase (PostgreSQL)
-- **認証**: Supabase Auth (メール/パスワード)
-- **ホスティング**: Vercel
-- **SMS送信**: iOSショートカット + マネージャーの通信プラン
-- **ソース管理**: GitHub
+- **Frontend**: Next.js 15 (App Router) + React + TypeScript
+- **Styling**: Tailwind CSS
+- **Backend/DB**: Supabase (PostgreSQL)
+- **Auth**: Supabase Auth (email/password)
+- **Hosting**: Vercel
+- **SMS sending**: iOS Shortcuts + the manager's phone plan
+- **Source control**: GitHub
 
-### 重要な前提
+### Important Constraints
 
-- **無料枠で運用する**。SupabaseのFree Tier、VercelのHobby枠を超えないこと。
-- **ユーザー数は最大2名**(マネージャー、アシスタントマネージャー)。スケーラビリティより簡潔さを優先する。
+- **Operate within free tiers.** Do not exceed Supabase Free Tier or Vercel Hobby limits.
+- **Maximum of 2 users** (manager, assistant manager). Prefer simplicity over scalability.
 
-## ディレクトリ構成
+## Directory Structure
 
 ```
 /
 ├── app/                    # Next.js App Router
-│   ├── (auth)/            # 認証関連ページ
-│   ├── (dashboard)/       # 認証後のページ
-│   ├── api/               # APIエンドポイント
+│   ├── (auth)/            # Authentication pages
+│   ├── (dashboard)/       # Pages behind authentication
+│   ├── api/               # API endpoints
 │   └── layout.tsx
-├── components/            # 再利用可能なコンポーネント
-│   ├── ui/               # 汎用UIコンポーネント
-│   └── features/         # 機能別コンポーネント
-├── lib/                  # ユーティリティ・クライアント
-│   ├── supabase/        # Supabaseクライアント
-│   ├── utils/           # 汎用関数
-│   └── validations/     # Zodスキーマなど
-├── types/               # TypeScript型定義
-├── supabase/           # マイグレーション
+├── components/            # Reusable components
+│   ├── ui/               # Generic UI components
+│   └── features/         # Feature-specific components
+├── lib/                  # Utilities and clients
+│   ├── supabase/        # Supabase clients
+│   ├── utils/           # Generic helpers
+│   └── validations/     # Zod schemas, etc.
+├── types/               # TypeScript type definitions
+├── supabase/           # Migrations
 │   └── migrations/
-└── public/             # 静的ファイル
+└── public/             # Static assets
 ```
 
-新しいファイルを作成する際は上記の構成に従うこと。新しいディレクトリを作る前に、既存のディレクトリで対応できないか検討する。
+Follow this structure when creating new files. Before adding a new directory, consider whether an existing one already fits.
 
-## データモデル
+## Data Model
 
-主要テーブル:
+Main tables:
 
-- `managers`: マネージャーアカウント (id, email, name, role)
-- `employees`: 従業員情報 (id, name, phone, visa_type, weekly_hour_limit, notes, is_active)
-- `recurring_days_off`: 曜日固定の休み (id, employee_id, day_of_week)
-- `requested_days_off`: リクエストオフ (id, employee_id, start_date, end_date, reason)
-- `shifts`: シフト情報 (id, employee_id, shift_date, start_time, is_off, status)
-- `message_logs`: 送信履歴 (id, shift_id, sent_at, message_body)
+- `managers`: manager accounts (id, email, name, role)
+- `employees`: employee info (id, name, phone, visa_type, weekly_hour_limit, notes, is_active)
+- `recurring_days_off`: fixed weekly days off (id, employee_id, day_of_week)
+- `requested_days_off`: requested time off (id, employee_id, start_date, end_date, reason)
+- `shifts`: shift data (id, employee_id, shift_date, start_time, is_off, status)
+- `message_logs`: send history (id, shift_id, sent_at, message_body)
 
-詳細はリポジトリ内の `docs/project_plan.md` を参照すること。
+See `docs/project_plan.md` in the repository for details.
 
-## コーディング規約
+## Coding Conventions
 
 ### TypeScript
 
-- `any`型は原則禁止。やむを得ず使う場合はコメントで理由を明記する。
-- データベースから取得する型は、Supabaseの自動生成型を活用する。
-- 関数の引数と戻り値の型は明示的に書く(推論に頼りすぎない)。
+- `any` is prohibited in principle. If unavoidable, document the reason in a comment.
+- Use Supabase's auto-generated types for data fetched from the database.
+- Write explicit types for function parameters and return values (don't over-rely on inference).
 
 ### React/Next.js
 
-- App Routerを使用する。Pages Routerは使わない。
-- サーバーコンポーネントを基本とし、必要な場合のみクライアントコンポーネント (`"use client"`) を使う。
-- データ取得はサーバーコンポーネントで行うのが望ましい。
-- フォーム処理は Server Actions を活用する。
+- Use the App Router. Do not use the Pages Router.
+- Default to Server Components; use Client Components (`"use client"`) only when necessary.
+- Prefer fetching data in Server Components.
+- Use Server Actions for form handling.
 
-### スタイリング
+### Styling
 
-- Tailwind CSSのユーティリティクラスを使用する。
-- カスタムCSSは原則書かない。
-- レスポンシブ対応は必須(マネージャーがスマホからも操作する可能性あり)。
-- 色やスペーシングは、Tailwindのデフォルトトークンを使用する。
+- Use Tailwind CSS utility classes.
+- Avoid custom CSS in principle.
+- Responsive support is required (managers may operate from their phones).
+- Use Tailwind's default tokens for colors and spacing.
 
-### 命名規則
+### Naming Conventions
 
-- ファイル名: kebab-case (例: `employee-form.tsx`)
-- コンポーネント名: PascalCase (例: `EmployeeForm`)
-- 関数・変数: camelCase
-- 定数: UPPER_SNAKE_CASE
-- 型・インターフェース: PascalCase
+- File names: kebab-case (e.g. `employee-form.tsx`)
+- Component names: PascalCase (e.g. `EmployeeForm`)
+- Functions/variables: camelCase
+- Constants: UPPER_SNAKE_CASE
+- Types/interfaces: PascalCase
 
-### 言語
+### Language
 
-- コメントは日本語OK
-- 変数名・関数名は英語
-- UIテキストは日本語(ユーザーが日本人マネージャーのため)
-- ただし、将来の英語対応を考慮し、UIテキストは直書きせず定数化が望ましい
+- Comments: English
+- Variable and function names: English
+- UI text: English (see the localization work in PR #46; historical note: the UI was originally Japanese for the initial Japanese-speaking manager)
+- Avoid hardcoding UI strings where practical; prefer extracting them to constants
 
-## 共同開発のルール
+## Collaboration Rules
 
-### ブランチ戦略
+### Branching Strategy
 
-- `main`: 本番デプロイ用、直接コミット禁止
-- 各Issueに対してブランチを作成する(GitHubのIssueから自動生成)
-- 命名規則: `[issue番号]-[簡潔な説明]` (Issueから自動生成される形式)
+- `main`: production deploys only, no direct commits
+- Create a branch per Issue (auto-generated from the GitHub Issue)
+- Naming: `[issue number]-[short-description]` (the format GitHub generates)
 
-### コミット規約
+### Commit Conventions
 
-Conventional Commits に準拠:
+Follow Conventional Commits:
 
-- `feat:` 新機能
-- `fix:` バグ修正
-- `refactor:` リファクタリング
-- `docs:` ドキュメント
-- `style:` フォーマット変更
-- `chore:` 設定など
+- `feat:` new feature
+- `fix:` bug fix
+- `refactor:` refactoring
+- `docs:` documentation
+- `style:` formatting changes
+- `chore:` configuration, etc.
 
-例: `feat: implement login page (#6)`
+Example: `feat: implement login page (#6)`
 
-コミットメッセージには関連Issueの番号を含める。
+Include the related Issue number in the commit message.
 
-### Pull Request
+### Pull Requests
 
-- すべての変更はPR経由でmainにマージする
-- PR本文に `Closes #[issue番号]` を含めて、マージ時にIssueが自動クローズされるようにする
-- 最低1名のレビューを必須とする
-- レビュー前にセルフレビューを行う(diff全体を見直す)
+- All changes are merged to main via PR
+- Include `Closes #[issue number]` in the PR body so the Issue closes automatically on merge
+- At least 1 review approval is required
+- Self-review before requesting review (read through the entire diff)
 
-## Claude Codeで作業する際の指針
+## Guidelines for Working with Claude Code
 
-### 重要事項
+### Key Points
 
-#### やってよいこと
+#### Allowed
 
-- 既存のコードスタイルに合わせた実装
-- 型定義の追加・修正
-- テストコードの追加
-- ドキュメントの追記
-- 不要になったコードの削除
+- Implementations that match the existing code style
+- Adding or fixing type definitions
+- Adding tests
+- Extending documentation
+- Removing dead code
 
-#### 必ず確認してから行うこと
+#### Requires confirmation first
 
-- 新しい依存パッケージの追加(無料枠を超えない、軽量なものか確認)
-- データベーススキーマの変更
-- 環境変数の追加
-- 認証フローの変更
-- APIエンドポイントの認証方法の変更
+- Adding new dependencies (verify they are lightweight and stay within free tiers)
+- Database schema changes
+- Adding environment variables
+- Changing the authentication flow
+- Changing how API endpoints authenticate
 
-#### やってはいけないこと
+#### Never do
 
-- **`.env.local` をコミットすること**
-- `main` ブランチに直接コミット・push
-- 既存のマイグレーションファイルの編集(新しいマイグレーションを追加する形で対応)
-- 無料枠を超える可能性のある外部APIの利用追加
-- 従業員の電話番号や個人情報をログに出力する
-- テストデータに実在の電話番号を使う
+- **Commit `.env.local`**
+- Commit or push directly to `main`
+- Edit existing migration files (add a new migration instead)
+- Add external API usage that could exceed free tiers
+- Log employee phone numbers or personal information
+- Use real phone numbers in test data
 
-### 作業を始める前の確認
+### Before Starting a Task
 
-新しいタスクに着手する際は以下を確認する:
+When picking up a new task:
 
-1. 関連するIssueを読み、要件を理解する
-2. 該当ブランチがmainから派生していて最新か確認する
-3. 既存の類似コードを参照して、スタイルを揃える
-4. データモデルやAPIの変更が必要か検討する
+1. Read the related Issue and understand the requirements
+2. Confirm the branch is based on the latest main
+3. Reference similar existing code and match its style
+4. Consider whether data model or API changes are needed
 
-### 不明点があった場合
+### When Unsure
 
-- 既存のコードを読んで理解する
-- `docs/project_plan.md` を参照する
-- それでも不明な場合は、推測で実装せず、ユーザーに確認する
+- Read the existing code
+- Refer to `docs/project_plan.md`
+- If still unclear, ask the user instead of guessing
 
-## iOSショートカット連携
+## iOS Shortcut Integration
 
-このプロジェクトの特殊な要素として、iOSショートカット連携がある。
+A distinctive part of this project is the iOS Shortcut integration.
 
-### 設計上の注意
+### Design Notes
 
-- ショートカットからアクセスされるAPIエンドポイントは `/api/shifts/messages` 系
-- 認証は簡易トークン方式(マネージャーのみ知る固定トークン)
-- レスポンスは必ず JSON で、ショートカットがパースしやすい構造にする
-- 電話番号は E.164 形式 (`+1XXXXXXXXXX`) で返す
+- The API endpoints accessed by the Shortcut live under `/api/shifts/messages`
+- Auth is a simple fixed token known only to the managers
+- Responses are always JSON, structured for easy parsing in the Shortcut
+- Phone numbers are returned in E.164 format (`+1XXXXXXXXXX`)
 
-### APIレスポンス例
+### Example API Response
 
 ```json
 {
@@ -218,57 +218,59 @@ Conventional Commits に準拠:
 }
 ```
 
-### グループSMSを避ける
+(Message bodies come from the templates stored in the database; the examples above show the original Japanese seed templates.)
 
-ショートカット側で1人ずつ個別送信するため、APIは配列を返すだけで良い。一括送信用のテキストを返す形式にはしない。
+### Avoid Group SMS
 
-## セキュリティ・プライバシー
+The Shortcut sends to each recipient individually in a loop, so the API only needs to return an array. Do not return a single combined broadcast text.
 
-- 従業員の電話番号は個人情報として慎重に扱う
-- フロントエンドに電話番号をベタ書きしない
-- ログ・エラー出力に電話番号や本名を含めない
-- Supabase RLSを必ず設定し、認証されたマネージャーのみがデータにアクセスできるようにする
+## Security & Privacy
 
-## テスト方針
+- Treat employee phone numbers as sensitive personal information
+- Never hardcode phone numbers in the frontend
+- Never include phone numbers or real names in logs or error output
+- Always configure Supabase RLS so only authenticated managers can access data
 
-- MVP段階では網羅的なテストは書かない(時間対効果を優先)
-- ただし、以下の処理は単体テストを書く:
-  - シフト時間の集計ロジック
-  - 週間労働時間の計算
-  - メッセージテンプレートの変数置換
-  - 電話番号のバリデーション・整形
-- E2Eテストは現時点では不要
+## Testing Policy
 
-## 環境変数
+- Do not write exhaustive tests at the MVP stage (prioritize effort-to-value)
+- However, write unit tests for:
+  - Shift time aggregation logic
+  - Weekly working-hours calculation
+  - Message template variable substitution
+  - Phone number validation and normalization
+- E2E tests are not needed at this time
 
-`.env.local` に以下を設定する(`.env.example` をコピーして使用):
+## Environment Variables
+
+Set the following in `.env.local` (copy from `.env.example`):
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=        # サーバーサイドのみ
-SHORTCUT_API_TOKEN=                # iOSショートカット認証用
+SUPABASE_SERVICE_ROLE_KEY=        # server-side only
+SHORTCUT_API_TOKEN=                # iOS Shortcut auth
 ```
 
-新しい環境変数を追加する場合は、`.env.example` も同時に更新する。
+When adding a new environment variable, update `.env.example` at the same time.
 
-## デプロイ
+## Deployment
 
-- mainブランチへのマージで自動的にVercelにデプロイされる
-- プレビューデプロイ: PR作成時に自動生成される
-- 環境変数はVercelのプロジェクト設定で管理する
+- Merging to main deploys automatically to Vercel
+- Preview deploys: generated automatically when a PR is opened
+- Environment variables are managed in the Vercel project settings
 
-## 参考ドキュメント
+## Reference Documents
 
-リポジトリ内の以下のドキュメントを必要に応じて参照する:
+Refer to these documents in the repository as needed:
 
-- `docs/project_plan.md`: 詳細なプロジェクトプラン
-- `docs/github_issues.md`: Issue一覧と着手順序
-- `README.md`: 環境構築・基本情報
+- `docs/project_plan.md`: detailed project plan
+- `docs/github_issues.md`: Issue list and suggested order
+- `README.md`: setup and basics
 
-## 困ったときは
+## Troubleshooting
 
-- ビルドエラー: 型エラーやimportエラーを確認
-- Supabase接続エラー: 環境変数を再確認
-- ショートカットが動かない: APIエンドポイントが認証を通っているか確認
-- スタイルが反映されない: Tailwindのpurge設定、`tailwind.config.ts` の `content` を確認
+- Build errors: check for type errors and import errors
+- Supabase connection errors: re-check environment variables
+- Shortcut not working: verify the API endpoint passes authentication
+- Styles not applied: check Tailwind purge settings and `content` in `tailwind.config.ts`

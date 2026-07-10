@@ -52,7 +52,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'データの取得に失敗しました' }, { status: 500 })
   }
 
-  // 本人が申請済みのオフ（リクエストオフ・定期オフ）は通知不要
+  // Days off the employee already requested (requested/recurring) need no notification
   const knownOffEmployeeIds = new Set([
     ...(requestedOff ?? []).map((r) => r.employee_id),
     ...(recurringOff ?? []).map((r) => r.employee_id),
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     .map((shift) => {
       const employee = Array.isArray(shift.employees) ? shift.employees[0] : shift.employees
       if (!employee) return null
-      // マネージャーにはSMSを送らない（デフォルト9:00・手動入力・Offいずれも対象外）
+      // Managers don't receive SMS (excluded whether default 9:00, manual entry, or Off)
       if (employee.is_manager) return null
 
       const body = shift.is_off
