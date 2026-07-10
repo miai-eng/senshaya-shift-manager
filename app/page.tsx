@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 
-// proxy.ts でも / は /dashboard or /login にリダイレクトされるが、
-// 直接アクセス時のフォールバックとして用意。
+// proxy.ts also redirects / to /dashboard or /login;
+// this is a fallback for direct access.
 export default function RootPage() {
   redirect('/login')
 }

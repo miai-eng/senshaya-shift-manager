@@ -65,8 +65,8 @@ export default async function MessagesPreviewPage({
 
   if (!lock) notFound()
 
-  // 本人が申請済みのオフ（リクエストオフ・定期オフ）はSMS生成APIでも除外されるため、
-  // プレビューにも表示しない（生成APIのフィルタと同一のロジック）
+  // Days off the employee already requested (requested/recurring) are excluded by the
+  // SMS generation API too, so they are hidden from the preview as well (same filter logic)
   const knownOffEmployeeIds = new Set([
     ...(requestedOff ?? []).map((r) => r.employee_id as string),
     ...(recurringOff ?? []).map((r) => r.employee_id as string),
@@ -81,7 +81,7 @@ export default async function MessagesPreviewPage({
       const emp = Array.isArray(shift.employees) ? shift.employees[0] : shift.employees
       if (!emp) return null
       if (shift.is_off && knownOffEmployeeIds.has(shift.employee_id)) return null
-      // マネージャーにはSMSを送らないため、プレビューにも表示しない
+      // Managers don't receive SMS, so they are hidden from the preview too
       if (emp.is_manager) return null
 
       const body = shift.is_off

@@ -1,4 +1,4 @@
--- shift_locks テーブルが未作成の場合に備えて作成（PR #34 とのマージ順依存を回避）
+-- Create shift_locks in case it doesn't exist yet (avoids merge-order dependency with PR #34)
 create table if not exists public.shift_locks (
   shift_date date primary key,
   locked_by uuid references public.managers(id),
@@ -11,12 +11,12 @@ create policy "managers_full_access_shift_locks"
   on public.shift_locks for all to authenticated
   using (true) with check (true);
 
--- 確定済み日付を匿名ユーザーが読める
+-- Anonymous users can read confirmed dates
 create policy "anon_read_shift_locks"
   on public.shift_locks for select to anon
   using (true);
 
--- 確定済み日付のシフトのみ匿名ユーザーが読める
+-- Anonymous users can read shifts for confirmed dates only
 create policy "anon_read_confirmed_shifts"
   on public.shifts for select to anon
   using (
@@ -26,7 +26,7 @@ create policy "anon_read_confirmed_shifts"
     )
   );
 
--- アクティブ従業員の基本情報を匿名ユーザーが読める（クエリ側で name/id のみ選択する）
+-- Anonymous users can read basic info for active employees (queries select name/id only)
 create policy "anon_read_active_employees"
   on public.employees for select to anon
   using (is_active = true);
