@@ -2,72 +2,74 @@ import { describe, expect, it } from 'vitest'
 import { renderTemplate } from './render-template'
 
 describe('renderTemplate', () => {
-  describe('変数置換', () => {
-    it('{date} を置換する', () => {
-      expect(renderTemplate('明日 {date} はお休みです', { date: '4月26日(日)' })).toBe(
-        '明日 4月26日(日) はお休みです',
+  describe('variable substitution', () => {
+    it('substitutes {date}', () => {
+      expect(renderTemplate('Tomorrow {date} is your day off', { date: 'Apr 26 (Sun)' })).toBe(
+        'Tomorrow Apr 26 (Sun) is your day off',
       )
     })
 
-    it('{time} を置換する', () => {
+    it('substitutes {time}', () => {
       expect(
-        renderTemplate('{date} は {time} からです', { date: '4月26日(日)', time: '9:00' }),
-      ).toBe('4月26日(日) は 9:00 からです')
+        renderTemplate('{date} starts at {time}', { date: 'Apr 26 (Sun)', time: '9:00' }),
+      ).toBe('Apr 26 (Sun) starts at 9:00')
     })
 
-    it('vars にない変数は原文のまま残す', () => {
-      expect(renderTemplate('今日は {undefined_var} です', {})).toBe('今日は {undefined_var} です')
+    it('leaves variables absent from vars as-is', () => {
+      expect(renderTemplate('Today is {undefined_var}', {})).toBe('Today is {undefined_var}')
     })
 
-    it('値が undefined の変数は原文のまま残す', () => {
-      expect(renderTemplate('{date} は {time} からです', { date: '4月26日(日)' })).toBe(
-        '4月26日(日) は {time} からです',
+    it('leaves variables with undefined values as-is', () => {
+      expect(renderTemplate('{date} starts at {time}', { date: 'Apr 26 (Sun)' })).toBe(
+        'Apr 26 (Sun) starts at {time}',
       )
     })
   })
 
-  describe('エスケープ', () => {
-    it('\\{ を { に変換する', () => {
-      expect(renderTemplate('\\{date\\}', { date: '4月26日(日)' })).toBe('{date}')
+  describe('escaping', () => {
+    it('converts \\{ to {', () => {
+      expect(renderTemplate('\\{date\\}', { date: 'Apr 26 (Sun)' })).toBe('{date}')
     })
 
-    it('\\\\ を \\ に変換する', () => {
+    it('converts \\\\ to \\', () => {
       expect(renderTemplate('path\\\\file', {})).toBe('path\\file')
     })
 
-    it('エスケープされた変数は置換しない', () => {
-      expect(renderTemplate('\\{date\\} と {date}', { date: '4月26日(日)' })).toBe(
-        '{date} と 4月26日(日)',
+    it('does not substitute escaped variables', () => {
+      expect(renderTemplate('\\{date\\} and {date}', { date: 'Apr 26 (Sun)' })).toBe(
+        '{date} and Apr 26 (Sun)',
       )
     })
   })
 
-  describe('サンプルテンプレート', () => {
-    it('出勤時テンプレートを正しく置換する', () => {
+  describe('sample templates', () => {
+    it('renders the attendance template correctly', () => {
       expect(
         renderTemplate('明日 {date} は {time} からです', { date: '4月26日(日)', time: '9:00' }),
       ).toBe('明日 4月26日(日) は 9:00 からです')
     })
 
-    it('休みテンプレートを正しく置換する', () => {
+    it('renders the day-off template correctly', () => {
       expect(renderTemplate('明日 {date} はお休みです', { date: '4月26日(日)' })).toBe(
         '明日 4月26日(日) はお休みです',
       )
     })
   })
 
-  describe('エッジケース', () => {
-    it('空文字テンプレートはそのまま返す', () => {
+  describe('edge cases', () => {
+    it('returns an empty template as-is', () => {
       expect(renderTemplate('', {})).toBe('')
     })
 
-    it('変数のない文字列はそのまま返す', () => {
-      expect(renderTemplate('変数なしのテキスト', {})).toBe('変数なしのテキスト')
+    it('returns a string with no variables as-is', () => {
+      expect(renderTemplate('plain text with no variables', {})).toBe(
+        'plain text with no variables',
+      )
     })
 
-    it('テンプレート本文中の改行はそのまま出力する', () => {
-      expect(renderTemplate('1行目\n2行目 {date}', { date: '4月26日(日)' })).toBe(
-        '1行目\n2行目 4月26日(日)',
+    it('passes line breaks in the template body through to the output', () => {
+      expect(renderTemplate('line 1\nline 2 {date}', { date: 'Apr 26 (Sun)' })).toBe(
+        'line 1\nline 2 Apr 26 (Sun)',
       )
     })
   })

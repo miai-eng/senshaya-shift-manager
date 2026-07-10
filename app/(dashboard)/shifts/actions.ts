@@ -120,7 +120,7 @@ export async function deleteShift(
     .eq('employee_id', employeeId)
     .eq('shift_date', shiftDate)
 
-  if (error) return { error: '削除に失敗しました' }
+  if (error) return { error: 'Failed to delete' }
 
   revalidatePath('/shifts')
   return {}

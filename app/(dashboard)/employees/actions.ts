@@ -98,7 +98,7 @@ export async function updateEmployee(
   await requireManager()
 
   const id = formData.get('id') as string
-  if (!id) return { error: '従業員IDが見つかりません' }
+  if (!id) return { error: 'Employee ID not found' }
 
   const { data, errors } = parseFormData(formData)
   if (errors) return { fieldErrors: errors }

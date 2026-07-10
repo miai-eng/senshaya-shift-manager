@@ -23,7 +23,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const date = request.nextUrl.searchParams.get('date')
   if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return NextResponse.json({ error: 'date パラメータが必要です (YYYY-MM-DD)' }, { status: 400 })
+    return NextResponse.json({ error: 'date parameter is required (YYYY-MM-DD)' }, { status: 400 })
   }
 
   const supabase = createAdminClient()
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   ])
 
   if (shiftsError || templatesError || requestedError || recurringError) {
-    return NextResponse.json({ error: 'データの取得に失敗しました' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 })
   }
 
   // Days off the employee already requested (requested/recurring) need no notification
