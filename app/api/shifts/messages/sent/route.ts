@@ -11,7 +11,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'リクエストボディが不正です' }, { status: 400 })
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
   if (
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     typeof (body as Record<string, unknown>).shift_id !== 'string' ||
     typeof (body as Record<string, unknown>).message_body !== 'string'
   ) {
-    return NextResponse.json({ error: 'shift_id と message_body が必要です' }, { status: 400 })
+    return NextResponse.json({ error: 'shift_id and message_body are required' }, { status: 400 })
   }
 
   const { shift_id, message_body } = body as { shift_id: string; message_body: string }
@@ -33,13 +33,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     .eq('id', shift_id)
 
   if (updateError) {
-    return NextResponse.json({ error: 'シフトステータスの更新に失敗しました' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to update shift status' }, { status: 500 })
   }
 
   const { error: logError } = await supabase.from('message_logs').insert({ shift_id, message_body })
 
   if (logError) {
-    return NextResponse.json({ error: '送信ログの記録に失敗しました' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to record send log' }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })
